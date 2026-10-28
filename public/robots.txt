@@ -1,0 +1,8 @@
+# Production Robots.txt for QR Menu Application
+User-agent: *
+Allow: /
+Allow: /menu
+Disallow: /admin
+Disallow: /api
+
+Sitemap: https://menu.kafeniz.com/sitemap.xml

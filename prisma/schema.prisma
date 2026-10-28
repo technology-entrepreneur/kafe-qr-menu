@@ -1,0 +1,145 @@
+// CRO & Satış Odaklı Modern QR Menü ve Kafe Yönetim Sistemi Prisma Şeması
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  nameEn    String?
+  icon      String?
+  order     Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  products  Product[]
+
+  @@index([order])
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  nameEn          String?
+  description     String?
+  descriptionEn   String?
+  price           Float
+  imageUrl        String?
+  isAvailable     Boolean  @default(true)
+  allergens       String?  // Virgülle ayrılmış alerjenler (Gluten, Süt vb.)
+  allergensEn     String?
+  dietary         String?  // Virgülle ayrılmış etiketler (vegan, gluten-free vb.)
+  calories        Int?
+  prepTimeMinutes Int?
+  badge           String?  // chef, popular, deal, new
+  order           Int      @default(0)
+  categoryId      String
+  campaignId      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  category        Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  campaign        Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  // Ekstra & Varyant Grupları (Süt seçimi, şurup, boy vb.)
+  extraGroups     ProductExtraGroup[]
+
+  // Çapraz Satış (Cross-Selling) İlişkileri
+  suggestions     ProductSuggestion[] @relation("SourceProduct")
+  suggestedIn     ProductSuggestion[] @relation("TargetProduct")
+
+  @@index([categoryId])
+  @@index([campaignId])
+  @@index([order])
+}
+
+model ProductExtraGroup {
+  id         String   @id @default(cuid())
+  productId  String
+  title      String   // Örn: "Süt Tercihi", "Ekstra Şurup & Tatlandırıcı"
+  isRequired Boolean  @default(false)
+  minSelect  Int      @default(0)
+  maxSelect  Int      @default(1)
+  order      Int      @default(0)
+
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options    ProductExtraOption[]
+
+  @@index([productId])
+}
+
+model ProductExtraOption {
+  id        String   @id @default(cuid())
+  groupId   String
+  name      String   // Örn: "Yulaf Sütü", "Laktozsuz Süt", "Karamel Şurup"
+  price     Float    @default(0) // Ekstra bedel (TL)
+  order     Int      @default(0)
+
+  group     ProductExtraGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+}
+
+model ProductSuggestion {
+  id                 String   @id @default(cuid())
+  productId          String   // Ana ürün (Örn: Filtre Kahve)
+  suggestedProductId String   // Birlikte önerilen ürün (Örn: Çıtır Kruvasan)
+
+  product            Product  @relation("SourceProduct", fields: [productId], references: [id], onDelete: Cascade)
+  suggestedProduct   Product  @relation("TargetProduct", fields: [suggestedProductId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, suggestedProductId])
+  @@index([productId])
+  @@index([suggestedProductId])
+}
+
+model Campaign {
+  id              String    @id @default(cuid())
+  title           String    // Örn: "Latte + Brownie Menüsü"
+  subtitle        String?   // Örn: "190 TL yerine sadece 150 TL"
+  badgeText       String?   // Örn: "GÜNÜN FIRSATI", "%30 İNDİRİM"
+  imageUrl        String?
+  originalPrice   Float?
+  discountedPrice Float?
+  isActive        Boolean   @default(true)
+  order           Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  products        Product[]
+
+  @@index([order])
+}
+
+model BusinessSettings {
+  id              String   @id @default("default")
+  cafeName        String   @default("Gloriouss Café")
+  logoUrl         String?  @default("/images/logo.png")
+  wifiSsid        String?  @default("Gloriouss_Guest")
+  wifiPassword    String?  @default("Gloriouss2026")
+  workingHours    String?  @default("Her gün: 09:00 - 02:00")
+  phone           String?  @default("+90 212 727 00 00")
+  address         String?  @default("Piri Mehmet Paşa Mah. Sahil Kordonu, Silivri, İstanbul")
+  instagramUrl    String?  @default("https://www.instagram.com/gloriousscafe/")
+  tiktokUrl       String?  @default("https://www.tiktok.com/@gloriousscafe")
+  googleReviewUrl String?  @default("https://maps.google.com/?q=Gloriouss+Cafe+Silivri")
+  whatsappNumber  String?  @default("905551234567")
+  updatedAt       DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?  @default("Yönetici")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

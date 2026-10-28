@@ -1,0 +1,54 @@
+import type { Metadata, Viewport } from "next";
+import { Inter, Outfit } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const outfit = Outfit({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-outfit",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  title: "Dijital QR Menü | Satış & Dönüşüm Odaklı Kafe Deneyimi",
+  description: "Temassız, hızlı ve zengin görsellerle donatılmış yeni nesil akıllı dijital kafe QR menüsü.",
+  keywords: ["qr menü", "dijital menü", "kafe menü", "kahve", "tatlı", "temassız menü", "artisan coffee"],
+  authors: [{ name: "Artisan Kafe" }],
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
+  openGraph: {
+    title: "Dijital QR Menü | Satış & Dönüşüm Odaklı Kafe Deneyimi",
+    description: "Temassız, hızlı ve zengin görsellerle donatılmış yeni nesil akıllı dijital kafe QR menüsü.",
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#080706",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="tr" className={`${inter.variable} ${outfit.variable}`}>
+      <body className="min-h-screen antialiased selection:bg-amber-500 selection:text-white">
+        {children}
+      </body>
+    </html>
+  );
+}
