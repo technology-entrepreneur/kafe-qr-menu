@@ -8,10 +8,9 @@ import {
   Sparkles,
   Globe,
   Coffee,
-  Tag,
-  ArrowRight,
 } from "lucide-react";
 import { BusinessSettingsData, CampaignItem, Language } from "@/types/menu";
+import CampaignSlider from "./CampaignSlider";
 
 interface MenuHeroProps {
   settings: BusinessSettingsData;
@@ -20,6 +19,7 @@ interface MenuHeroProps {
   language: Language;
   onLanguageChange: (lang: Language) => void;
   onOpenWifi: () => void;
+  onSelectCampaign?: (campaign: CampaignItem) => void;
 }
 
 export default function MenuHero({
@@ -29,9 +29,9 @@ export default function MenuHero({
   language,
   onLanguageChange,
   onOpenWifi,
+  onSelectCampaign,
 }: MenuHeroProps) {
   const isEn = language === "en";
-  const activeCampaign = campaigns.find((c) => c.isActive);
 
   return (
     <header className="relative w-full border-b border-stone-800/60 bg-gradient-to-b from-[#120e0b] via-[#0c0a08] to-[#080706]">
@@ -143,70 +143,15 @@ export default function MenuHero({
         </div>
 
         {/* ==================================================== */}
-        {/* 3. AKTİF KAMPANYA BANNERI (Varsa Gösterilir)         */}
+        {/* 3. AKTİF KAMPANYALAR SLIDERI (Tüm Fırsatlar)         */}
         {/* ==================================================== */}
-        {activeCampaign && (() => {
-          const discPrice =
-            activeCampaign.discountedPrice ??
-            (activeCampaign.title.includes("San Sebastian") ? 285 : null);
-          const origPrice =
-            activeCampaign.originalPrice ??
-            (activeCampaign.title.includes("San Sebastian") ? 345 : null);
-
-          return (
-            <div className="mt-1 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 via-stone-900/90 to-amber-950/25 border border-amber-500/40 flex items-center justify-between gap-2.5 text-xs shadow-md shadow-amber-500/5">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-7 h-7 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center flex-shrink-0 font-bold shadow-sm shadow-amber-500/30">
-                  <Tag className="w-4 h-4" />
-                </span>
-                <div className="min-w-0">
-                  <p className="font-extrabold text-amber-300 truncate text-xs sm:text-sm">
-                    {isEn
-                      ? (activeCampaign as any).titleEn ||
-                        (activeCampaign.title === "Latte + San Sebastian Menüsü"
-                          ? "Latte + San Sebastian Combo"
-                          : activeCampaign.title)
-                      : activeCampaign.title}
-                  </p>
-                  {activeCampaign.subtitle && (
-                    <p className="text-[10px] sm:text-[11px] text-stone-400 truncate">
-                      {isEn
-                        ? (activeCampaign as any).subtitleEn ||
-                          (activeCampaign.subtitle.includes("Belçika")
-                            ? "Velvety hot latte paired with creamy Belgian chocolate cheesecake"
-                            : activeCampaign.subtitle)
-                        : activeCampaign.subtitle}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Sağ Taraf: Fiyat ve Rozet */}
-              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-2 flex-shrink-0">
-                {discPrice && (
-                  <div className="flex items-baseline gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-xl bg-stone-950/90 border border-amber-500/40 shadow-inner">
-                    {origPrice && origPrice > discPrice && (
-                      <span className="text-[10px] sm:text-[11px] font-medium text-stone-500 line-through">
-                        ₺{origPrice}
-                      </span>
-                    )}
-                    <span className="text-xs sm:text-sm font-black text-amber-400 font-display tracking-tight">
-                      ₺{discPrice}
-                    </span>
-                  </div>
-                )}
-
-                <span className="text-[9px] sm:text-[10px] font-black text-amber-300 whitespace-nowrap bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30 uppercase tracking-wider shadow-sm">
-                  {isEn
-                    ? activeCampaign.badgeText === "GÜNÜN FIRSATI"
-                      ? "DAILY DEAL"
-                      : "SPECIAL DEAL"
-                    : activeCampaign.badgeText || "Fırsat"}
-                </span>
-              </div>
-            </div>
-          );
-        })()}
+        {campaigns && campaigns.length > 0 && (
+          <CampaignSlider
+            campaigns={campaigns}
+            language={language}
+            onSelectCampaign={onSelectCampaign}
+          />
+        )}
       </div>
     </header>
   );

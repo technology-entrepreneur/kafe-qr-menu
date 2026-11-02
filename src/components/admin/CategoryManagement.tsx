@@ -17,14 +17,18 @@ interface CategoryManagementProps {
 export default function CategoryManagement({ categories }: CategoryManagementProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryItem | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleOpenAdd = () => {
     setEditingCategory(null);
+    setFormError(null);
     setModalOpen(true);
   };
 
   const handleOpenEdit = (cat: CategoryItem) => {
     setEditingCategory(cat);
+    setFormError(null);
     setModalOpen(true);
   };
 
@@ -40,14 +44,31 @@ export default function CategoryManagement({ categories }: CategoryManagementPro
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setFormError(null);
+
     const formData = new FormData(e.currentTarget);
 
-    if (editingCategory) {
-      await updateCategoryAction(editingCategory.id, formData);
-    } else {
-      await addCategoryAction(formData);
+    try {
+      let res;
+      if (editingCategory) {
+        res = await updateCategoryAction(editingCategory.id, formData);
+      } else {
+        res = await addCategoryAction(formData);
+      }
+
+      if (res && !res.success) {
+        setFormError(res.error || "Kategori kaydedilirken bir hata oluştu.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      setModalOpen(false);
+    } catch (err: any) {
+      setFormError(err.message || "İşlem sırasında bir hata oluştu.");
+    } finally {
+      setIsSubmitting(false);
     }
-    setModalOpen(false);
   };
 
   return (
@@ -153,6 +174,12 @@ export default function CategoryManagement({ categories }: CategoryManagementPro
               {editingCategory ? "Kategoriyi Düzenle" : "Yeni Kategori Ekle"}
             </h3>
 
+            {formError && (
+              <div className="mt-3 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-semibold">
+                ⚠️ {formError}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="mt-4 space-y-3 text-xs">
               <div>
                 <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-1">
@@ -247,9 +274,10 @@ export default function CategoryManagement({ categories }: CategoryManagementPro
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-amber-600 px-5 py-2 font-bold text-white shadow hover:bg-amber-700"
+                  disabled={isSubmitting}
+                  className="rounded-xl bg-amber-600 px-5 py-2 font-bold text-white shadow hover:bg-amber-700 disabled:opacity-50"
                 >
-                  Kaydet
+                  {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
                 </button>
               </div>
             </form>

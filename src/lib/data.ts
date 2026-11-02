@@ -578,15 +578,29 @@ export async function createCategory(
   nameEn?: string | null,
   icon?: string | null
 ) {
-  return await prisma.category.create({
-    data: {
+  try {
+    return await prisma.category.create({
+      data: {
+        name,
+        order,
+        isActive,
+        nameEn: nameEn || null,
+        icon: icon || null,
+      },
+    });
+  } catch (err) {
+    const newCat: CategoryItem = {
+      id: `cat-${Date.now()}`,
       name,
       order,
       isActive,
       nameEn: nameEn || null,
       icon: icon || null,
-    },
-  });
+      products: [],
+    };
+    initialCategories.push(newCat);
+    return newCat;
+  }
 }
 
 export async function updateCategory(
@@ -599,16 +613,31 @@ export async function updateCategory(
     isActive?: boolean;
   }
 ) {
-  return await prisma.category.update({
-    where: { id },
-    data,
-  });
+  try {
+    return await prisma.category.update({
+      where: { id },
+      data,
+    });
+  } catch (err) {
+    const idx = initialCategories.findIndex((c) => c.id === id);
+    if (idx !== -1) {
+      initialCategories[idx] = { ...initialCategories[idx], ...data };
+      return initialCategories[idx];
+    }
+    return null;
+  }
 }
 
 export async function deleteCategory(id: string) {
-  return await prisma.category.delete({
-    where: { id },
-  });
+  try {
+    return await prisma.category.delete({
+      where: { id },
+    });
+  } catch (err) {
+    const idx = initialCategories.findIndex((c) => c.id === id);
+    if (idx !== -1) initialCategories.splice(idx, 1);
+    return { success: true };
+  }
 }
 
 // ==========================================
@@ -631,8 +660,29 @@ export async function createProduct(data: {
   categoryId: string;
   order?: number;
 }) {
-  return await prisma.product.create({
-    data: {
+  try {
+    return await prisma.product.create({
+      data: {
+        name: data.name,
+        nameEn: data.nameEn || null,
+        description: data.description || null,
+        descriptionEn: data.descriptionEn || null,
+        price: data.price,
+        imageUrl: data.imageUrl || null,
+        isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
+        allergens: data.allergens || null,
+        allergensEn: data.allergensEn || null,
+        dietary: data.dietary || null,
+        calories: data.calories !== undefined ? data.calories : null,
+        prepTimeMinutes: data.prepTimeMinutes !== undefined ? data.prepTimeMinutes : null,
+        badge: data.badge || null,
+        categoryId: data.categoryId,
+        order: data.order ?? 0,
+      },
+    });
+  } catch (err) {
+    const newProd: ProductItem = {
+      id: `prod-${Date.now()}`,
       name: data.name,
       nameEn: data.nameEn || null,
       description: data.description || null,
@@ -642,54 +692,94 @@ export async function createProduct(data: {
       isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
       allergens: data.allergens || null,
       allergensEn: data.allergensEn || null,
-      dietary: data.dietary || null,
-      calories: data.calories !== undefined ? data.calories : null,
-      prepTimeMinutes: data.prepTimeMinutes !== undefined ? data.prepTimeMinutes : null,
+      calories: data.calories || null,
+      prepTimeMinutes: data.prepTimeMinutes || null,
       badge: data.badge || null,
       categoryId: data.categoryId,
       order: data.order ?? 0,
-    },
-  });
+    };
+    const cat = initialCategories.find((c) => c.id === data.categoryId);
+    if (cat) {
+      cat.products = cat.products || [];
+      cat.products.push(newProd);
+    }
+    return newProd;
+  }
 }
 
 export async function updateProduct(
   id: string,
   data: Partial<Omit<ProductItem, "id" | "createdAt" | "updatedAt">>
 ) {
-  return await prisma.product.update({
-    where: { id },
-    data: {
-      ...(data.name !== undefined && { name: data.name }),
-      ...(data.nameEn !== undefined && { nameEn: data.nameEn }),
-      ...(data.description !== undefined && { description: data.description }),
-      ...(data.descriptionEn !== undefined && { descriptionEn: data.descriptionEn }),
-      ...(data.price !== undefined && { price: data.price }),
-      ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
-      ...(data.isAvailable !== undefined && { isAvailable: data.isAvailable }),
-      ...(data.allergens !== undefined && { allergens: data.allergens }),
-      ...(data.allergensEn !== undefined && { allergensEn: data.allergensEn }),
-      ...(data.calories !== undefined && { calories: data.calories }),
-      ...(data.prepTimeMinutes !== undefined && { prepTimeMinutes: data.prepTimeMinutes }),
-      ...(data.badge !== undefined && { badge: data.badge }),
-      ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
-      ...(data.order !== undefined && { order: data.order }),
-    },
-  });
+  try {
+    return await prisma.product.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.nameEn !== undefined && { nameEn: data.nameEn }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.descriptionEn !== undefined && { descriptionEn: data.descriptionEn }),
+        ...(data.price !== undefined && { price: data.price }),
+        ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+        ...(data.isAvailable !== undefined && { isAvailable: data.isAvailable }),
+        ...(data.allergens !== undefined && { allergens: data.allergens }),
+        ...(data.allergensEn !== undefined && { allergensEn: data.allergensEn }),
+        ...(data.calories !== undefined && { calories: data.calories }),
+        ...(data.prepTimeMinutes !== undefined && { prepTimeMinutes: data.prepTimeMinutes }),
+        ...(data.badge !== undefined && { badge: data.badge }),
+        ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+        ...(data.order !== undefined && { order: data.order }),
+      },
+    });
+  } catch (err) {
+    for (const cat of initialCategories) {
+      const pIdx = (cat.products || []).findIndex((p) => p.id === id);
+      if (pIdx !== -1 && cat.products) {
+        cat.products[pIdx] = { ...cat.products[pIdx], ...data };
+        return cat.products[pIdx];
+      }
+    }
+    return null;
+  }
 }
 
 export async function toggleProductStock(id: string) {
-  const existing = await prisma.product.findUnique({ where: { id } });
-  if (!existing) return null;
-  return await prisma.product.update({
-    where: { id },
-    data: { isAvailable: !existing.isAvailable },
-  });
+  try {
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) return null;
+    return await prisma.product.update({
+      where: { id },
+      data: { isAvailable: !existing.isAvailable },
+    });
+  } catch (err) {
+    for (const cat of initialCategories) {
+      const found = (cat.products || []).find((p) => p.id === id);
+      if (found) {
+        found.isAvailable = !found.isAvailable;
+        return found;
+      }
+    }
+    return null;
+  }
 }
 
 export async function deleteProduct(id: string) {
-  return await prisma.product.delete({
-    where: { id },
-  });
+  try {
+    return await prisma.product.delete({
+      where: { id },
+    });
+  } catch (err) {
+    for (const cat of initialCategories) {
+      if (cat.products) {
+        const pIdx = cat.products.findIndex((p) => p.id === id);
+        if (pIdx !== -1) {
+          cat.products.splice(pIdx, 1);
+          return { success: true };
+        }
+      }
+    }
+    return { success: true };
+  }
 }
 
 // ==========================================

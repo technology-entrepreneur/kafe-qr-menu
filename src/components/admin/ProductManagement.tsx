@@ -25,6 +25,8 @@ export default function ProductManagement({
   const [crossSellProduct, setCrossSellProduct] = useState<ProductItem | null>(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("ALL");
   const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [imageUrlInput, setImageUrlInput] = useState("");
 
   // Filtreleme
@@ -35,12 +37,14 @@ export default function ProductManagement({
   const handleOpenAddModal = () => {
     setEditingProduct(null);
     setImageUrlInput("");
+    setFormError(null);
     setModalOpen(true);
   };
 
   const handleOpenEditModal = (product: ProductItem) => {
     setEditingProduct(product);
     setImageUrlInput(product.imageUrl || "");
+    setFormError(null);
     setModalOpen(true);
   };
 
@@ -84,15 +88,32 @@ export default function ProductManagement({
   // Form Gönderme
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setFormError(null);
+
     const formData = new FormData(e.currentTarget);
     formData.set("imageUrl", imageUrlInput);
 
-    if (editingProduct) {
-      await updateProductAction(editingProduct.id, formData);
-    } else {
-      await addProductAction(formData);
+    try {
+      let res;
+      if (editingProduct) {
+        res = await updateProductAction(editingProduct.id, formData);
+      } else {
+        res = await addProductAction(formData);
+      }
+
+      if (res && !res.success) {
+        setFormError(res.error || "Ürün kaydedilirken bir hata oluştu.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      setModalOpen(false);
+    } catch (err: any) {
+      setFormError(err.message || "İşlem sırasında bir hata oluştu.");
+    } finally {
+      setIsSubmitting(false);
     }
-    setModalOpen(false);
   };
 
   return (
@@ -263,6 +284,12 @@ export default function ProductManagement({
             <h3 className="text-xl font-bold font-display text-stone-900 dark:text-stone-100">
               {editingProduct ? "Ürünü Düzenle" : "Yeni Ürün Ekle"}
             </h3>
+
+            {formError && (
+              <div className="mt-3 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-semibold">
+                ⚠️ {formError}
+              </div>
+            )}
 
             <form onSubmit={handleFormSubmit} className="mt-4 space-y-4 text-xs">
               {/* Ürün Adı (TR & EN) */}
@@ -510,9 +537,14 @@ export default function ProductManagement({
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-amber-600 px-5 py-2 font-bold text-white shadow hover:bg-amber-700"
+                  disabled={isSubmitting}
+                  className="rounded-xl bg-amber-600 px-5 py-2 font-bold text-white shadow hover:bg-amber-700 disabled:opacity-50"
                 >
-                  {editingProduct ? "Güncellemeleri Kaydet" : "Ürünü Kaydet"}
+                  {isSubmitting
+                    ? "Kaydediliyor..."
+                    : editingProduct
+                    ? "Güncellemeleri Kaydet"
+                    : "Ürünü Kaydet"}
                 </button>
               </div>
             </form>

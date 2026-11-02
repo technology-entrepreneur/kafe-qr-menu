@@ -47,10 +47,20 @@ export default function ProductCrossSellModal({
   // Çapraz Satışları Kaydet
   const handleSaveCrossSells = async () => {
     setIsSavingCrossSells(true);
-    await setProductCrossSellsAction(product.id, selectedCrossSellIds);
-    setIsSavingCrossSells(false);
-    setCrossSellSaved(true);
-    setTimeout(() => setCrossSellSaved(false), 2000);
+    try {
+      const res = await setProductCrossSellsAction(product.id, selectedCrossSellIds);
+      if (res && !res.success) {
+        alert(res.error || "Öneriler kaydedilirken hata oluştu.");
+        setIsSavingCrossSells(false);
+        return;
+      }
+      setIsSavingCrossSells(false);
+      setCrossSellSaved(true);
+      setTimeout(() => setCrossSellSaved(false), 2000);
+    } catch (err: any) {
+      alert(err.message || "Kaydetme sırasında bir hata oluştu.");
+      setIsSavingCrossSells(false);
+    }
   };
 
   // Ekstra Grubu Seçenek Satırı Ekle
@@ -77,17 +87,26 @@ export default function ProductCrossSellModal({
       return;
     }
 
-    await addProductExtraGroupAction(
-      product.id,
-      groupTitle,
-      isRequired,
-      maxSelect,
-      validOptions
-    );
+    try {
+      const res = await addProductExtraGroupAction(
+        product.id,
+        groupTitle,
+        isRequired,
+        maxSelect,
+        validOptions
+      );
 
-    setIsAddingGroup(false);
-    setGroupTitle("");
-    setOptions([{ name: "", price: 0 }]);
+      if (res && !res.success) {
+        alert(res.error || "Ekstra grubu eklenirken bir hata oluştu.");
+        return;
+      }
+
+      setIsAddingGroup(false);
+      setGroupTitle("");
+      setOptions([{ name: "", price: 0 }]);
+    } catch (err: any) {
+      alert(err.message || "İşlem sırasında bir hata oluştu.");
+    }
   };
 
   const handleDeleteGroup = async (groupId: string) => {

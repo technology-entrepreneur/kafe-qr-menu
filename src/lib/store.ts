@@ -28,6 +28,7 @@ interface MenuStoreState {
   
   // Sepet Eylemleri
   addToCart: (product: ProductItem, options?: SelectedExtraOption[], qty?: number) => void;
+  updateQuantity: (index: number, quantity: number) => void;
   removeFromCart: (index: number) => void;
   clearCart: () => void;
   setIsCartOpen: (open: boolean) => void;
@@ -127,13 +128,45 @@ export const useMenuStore = create<MenuStoreState>((set, get) => ({
     const selectedOptions = options !== undefined ? options : get().selectedOptions;
     const quantity = qty && qty > 0 ? qty : 1;
     const unitPrice = calculateItemUnitPrice(product.price, selectedOptions);
-    const totalPrice = unitPrice * quantity;
 
+    // Aynı ürün ve birebir aynı ekstralara sahip mevcut kalemi bul
+    const currentCart = get().cart;
+    const sortedOptIds = (opts: SelectedExtraOption[]) =>
+      opts.map((o) => o.optionId).sort().join(",");
+    const targetOptKey = sortedOptIds(selectedOptions);
+
+    const existingIndex = currentCart.findIndex(
+      (item) =>
+        item.product.id === product.id &&
+        sortedOptIds(item.selectedOptions) === targetOptKey
+    );
+
+    if (existingIndex !== -1) {
+      // Mevcut kalemin adetini artır
+      const updatedCart = [...currentCart];
+      const existing = updatedCart[existingIndex];
+      const newQty = existing.quantity + quantity;
+      updatedCart[existingIndex] = {
+        ...existing,
+        quantity: newQty,
+        totalPrice: unitPrice * newQty,
+      };
+
+      set({
+        cart: updatedCart,
+        selectedProduct: null,
+        isProductModalOpen: false,
+        selectedOptions: [],
+      });
+      return;
+    }
+
+    // Yeni satır olarak ekle
     const newItem: CartItem = {
       product,
       quantity,
       selectedOptions: [...selectedOptions],
-      totalPrice,
+      totalPrice: unitPrice * quantity,
     };
 
     set((state) => ({
@@ -142,6 +175,25 @@ export const useMenuStore = create<MenuStoreState>((set, get) => ({
       isProductModalOpen: false,
       selectedOptions: [],
     }));
+  },
+
+  updateQuantity: (index: number, quantity: number) => {
+    if (quantity <= 0) {
+      get().removeFromCart(index);
+      return;
+    }
+    set((state) => {
+      const updated = [...state.cart];
+      const item = updated[index];
+      if (!item) return state;
+      const unitPrice = calculateItemUnitPrice(item.product.price, item.selectedOptions);
+      updated[index] = {
+        ...item,
+        quantity,
+        totalPrice: unitPrice * quantity,
+      };
+      return { cart: updated };
+    });
   },
 
   removeFromCart: (index: number) => {

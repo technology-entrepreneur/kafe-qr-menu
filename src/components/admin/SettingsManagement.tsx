@@ -11,6 +11,8 @@ interface SettingsManagementProps {
 
 export default function SettingsManagement({ settings }: SettingsManagementProps) {
   const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [logoInput, setLogoInput] = useState(settings.logoUrl || "");
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
@@ -40,12 +42,26 @@ export default function SettingsManagement({ settings }: SettingsManagementProps
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSaving(true);
+    setErrorMsg(null);
+
     const formData = new FormData(e.currentTarget);
     formData.set("logoUrl", logoInput);
 
-    await updateBusinessSettingsAction(formData);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      const res = await updateBusinessSettingsAction(formData);
+      if (res && !res.success) {
+        setErrorMsg(res.error || "Ayarlar kaydedilirken hata oluştu.");
+        setIsSaving(false);
+        return;
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Beklenmedik bir hata oluştu.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -251,7 +267,12 @@ export default function SettingsManagement({ settings }: SettingsManagementProps
         </div>
 
         {/* Kaydet Butonu */}
-        <div className="flex items-center justify-end gap-3">
+        <div className="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-3">
+          {errorMsg && (
+            <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+              ⚠️ {errorMsg}
+            </span>
+          )}
           {saved && (
             <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600">
               <Check className="h-4 w-4" />
@@ -260,10 +281,11 @@ export default function SettingsManagement({ settings }: SettingsManagementProps
           )}
           <button
             type="submit"
-            className="flex items-center gap-2 rounded-2xl bg-amber-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-amber-600/20 hover:bg-amber-700 active:scale-95 transition-all"
+            disabled={isSaving}
+            className="flex items-center gap-2 rounded-2xl bg-amber-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-amber-600/20 hover:bg-amber-700 active:scale-95 transition-all disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
-            <span>Ayarları Güncelle</span>
+            <span>{isSaving ? "Kaydediliyor..." : "Ayarları Güncelle"}</span>
           </button>
         </div>
       </form>

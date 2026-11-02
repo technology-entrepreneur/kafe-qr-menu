@@ -15,6 +15,7 @@ import {
   Heart,
   ArrowRight,
   ShoppingBag,
+  Ban,
 } from "lucide-react";
 import { ProductItem, Language, SelectedExtraOption } from "@/types/menu";
 import { useMenuStore } from "@/lib/store";
@@ -43,12 +44,14 @@ export default function ProductDetailDrawer({
   const [addedToast, setAddedToast] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const { addToCart } = useMenuStore();
 
   // Ürün değiştiğinde zorunlu seçenekleri varsayılan olarak seç
   React.useEffect(() => {
     setImgError(false);
+    setValidationError(null);
     if (product) {
       setQuantity(1);
       const defaults: SelectedExtraOption[] = [];
@@ -86,11 +89,17 @@ export default function ProductDetailDrawer({
     groupId: string,
     groupTitle: string,
     option: { id: string; name: string; price: number },
-    maxSelect: number
+    maxSelect: number,
+    isRequiredGroup = false
   ) => {
+    setValidationError(null);
     const isSelected = localSelectedOptions.some((o) => o.optionId === option.id);
 
     if (isSelected) {
+      // Zorunlu tekli seçimde aynı seçeneğe tıklandığında seçimi kaldırma (standart radyo davranışı)
+      if (maxSelect === 1 && isRequiredGroup) {
+        return;
+      }
       setLocalSelectedOptions((prev) => prev.filter((o) => o.optionId !== option.id));
       return;
     }
@@ -133,7 +142,33 @@ export default function ProductDetailDrawer({
   // Sepete ekleme işlemi
   const handleAddToCart = () => {
     if (!product || isAdding) return; // Çift tıklama engeli
+
+    if (!product.isAvailable) {
+      setValidationError(
+        isEn ? "This item is currently sold out." : "Bu ürün şu an maalesef tükendi."
+      );
+      return;
+    }
+
+    // Zorunlu seçenek kontrolü
+    if (product.extraGroups && product.extraGroups.length > 0) {
+      for (const group of product.extraGroups) {
+        if (group.isRequired) {
+          const hasOption = localSelectedOptions.some((o) => o.groupId === group.id);
+          if (!hasOption) {
+            setValidationError(
+              isEn
+                ? `Please choose an option for "${group.titleEn || group.title}".`
+                : `Lütfen "${group.title}" tercihinizi belirleyin.`
+            );
+            return;
+          }
+        }
+      }
+    }
+
     setIsAdding(true);
+    setValidationError(null);
 
     try {
       addToCart(product, localSelectedOptions, quantity);
@@ -148,10 +183,28 @@ export default function ProductDetailDrawer({
     }
   };
 
-  // Çapraz satış önerileri (Aynı kategoriden veya popüler 2 ürün)
-  const crossSellSuggestions = product
-    ? allProducts.filter((p) => p.id !== product.id && p.isAvailable).slice(0, 3)
-    : [];
+  // Çapraz satış önerileri (Önce Admin'de tanımlanmış özel öneriler, sonra ilgili/popüler lezzetler)
+  const crossSellSuggestions = useMemo(() => {
+    if (!product) return [];
+
+    if (product.suggestions && product.suggestions.length > 0) {
+      const explicit = product.suggestions
+        .map((s) => s.suggestedProduct || allProducts.find((p) => p.id === s.suggestedProductId))
+        .filter((p): p is ProductItem => Boolean(p && p.isAvailable && p.id !== product.id));
+
+      if (explicit.length > 0) return explicit.slice(0, 3);
+    }
+
+    const sameCategory = allProducts.filter(
+      (p) => p.id !== product.id && p.isAvailable && p.categoryId === product.categoryId
+    );
+    const populars = allProducts.filter(
+      (p) => p.id !== product.id && p.isAvailable && p.badge === "popular"
+    );
+
+    const merged = Array.from(new Set([...sameCategory, ...populars, ...allProducts]));
+    return merged.filter((p) => p.id !== product.id && p.isAvailable).slice(0, 3);
+  }, [product, allProducts]);
 
   return (
     <AnimatePresence>
@@ -333,7 +386,8 @@ export default function ProductDetailDrawer({
                                   group.id,
                                   group.title,
                                   opt,
-                                  group.maxSelect
+                                  group.maxSelect,
+                                  group.isRequired
                                 )
                               }
                               className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs transition-all ${
@@ -416,54 +470,73 @@ export default function ProductDetailDrawer({
             {/* ==================================================== */}
             {/* ALT SABİT AKSİYON: MİKTAR & SİPARİŞE EKLE BUTONU     */}
             {/* ==================================================== */}
-            <div className="p-4 border-t border-stone-800 bg-[#0c0a09]/95 backdrop-blur-md flex items-center gap-3">
-              {/* Miktar Seçici (- 1 +) */}
-              <div className="flex items-center gap-2 rounded-2xl bg-stone-900 border border-stone-800 p-1.5">
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 flex items-center justify-center transition-colors"
-                >
-                  <Minus className="w-3.5 h-3.5" />
-                </button>
-                <span className="w-6 text-center font-bold text-sm text-stone-100">
-                  {quantity}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => q + 1)}
-                  className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 flex items-center justify-center transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
+            <div className="p-4 border-t border-stone-800 bg-[#0c0a09]/95 backdrop-blur-md flex flex-col gap-2.5">
+              {/* Varsa Doğrulama veya Stok Uyarısı */}
+              {validationError && (
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold animate-pulse">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-400" />
+                  <span>{validationError}</span>
+                </div>
+              )}
 
-              {/* Siparişe Ekle / Onayla Butonu */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleAddToCart}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold text-sm shadow-xl transition-all duration-300 ${
-                  addedToast
-                    ? "bg-emerald-500 text-stone-950 shadow-emerald-500/25"
-                    : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 shadow-amber-500/20"
-                }`}
-              >
-                {addedToast ? (
+              <div className="flex items-center gap-3">
+                {product.isAvailable ? (
                   <>
-                    <Check className="w-4 h-4 stroke-[3]" />
-                    <span>{isEn ? "Added to Order!" : "Siparişe Eklendi!"}</span>
+                    {/* Miktar Seçici (- 1 +) */}
+                    <div className="flex items-center gap-2 rounded-2xl bg-stone-900 border border-stone-800 p-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 flex items-center justify-center transition-colors"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="w-6 text-center font-bold text-sm text-stone-100">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => q + 1)}
+                        className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 flex items-center justify-center transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Siparişe Ekle / Onayla Butonu */}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleAddToCart}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold text-sm shadow-xl transition-all duration-300 ${
+                        addedToast
+                          ? "bg-emerald-500 text-stone-950 shadow-emerald-500/25"
+                          : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 shadow-amber-500/20"
+                      }`}
+                    >
+                      {addedToast ? (
+                        <>
+                          <Check className="w-4 h-4 stroke-[3]" />
+                          <span>{isEn ? "Added to Order!" : "Siparişe Eklendi!"}</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
+                          <span>{isEn ? "Add to Order" : "Siparişe Ekle"}</span>
+                          <span className="font-extrabold tracking-tight">
+                            • ₺{totalPrice.toLocaleString("tr-TR")}
+                          </span>
+                        </>
+                      )}
+                    </motion.button>
                   </>
                 ) : (
-                  <>
-                    <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
-                    <span>{isEn ? "Add to Order" : "Siparişe Ekle"}</span>
-                    <span className="font-extrabold tracking-tight">
-                      • ₺{totalPrice.toLocaleString("tr-TR")}
-                    </span>
-                  </>
+                  <div className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl font-bold text-sm bg-stone-900 border border-stone-800 text-stone-400">
+                    <Ban className="w-4 h-4 text-rose-400" />
+                    <span>{isEn ? "Currently Sold Out" : "Bu Ürün Şu An Tükendi"}</span>
+                  </div>
                 )}
-              </motion.button>
+              </div>
             </div>
           </motion.div>
         </>

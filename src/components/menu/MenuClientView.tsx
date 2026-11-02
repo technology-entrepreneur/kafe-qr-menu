@@ -9,6 +9,7 @@ import FloatingBar from "./FloatingBar";
 import GoogleReviewCard from "./GoogleReviewCard";
 import WifiModal from "./WifiModal";
 import CartTrayDrawer from "./CartTrayDrawer";
+import CampaignDetailDrawer from "./CampaignDetailDrawer";
 import NetworkOfflineBanner from "@/components/ui/NetworkOfflineBanner";
 import {
   CategoryItem,
@@ -65,6 +66,9 @@ export default function MenuClientView({
   // Detay Çekmecesi Durumu (Bottom Sheet Drawer)
   const [drawerProduct, setDrawerProduct] = useState<ProductItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Fırsat / Kampanya Detay Çekmecesi Durumu
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignItem | null>(null);
 
   // Wi-Fi Modal Durumu
   const [isWifiOpen, setIsWifiOpen] = useState(false);
@@ -195,6 +199,7 @@ function normalizeForSearch(text: string | null | undefined): string {
         language={language}
         onLanguageChange={setLanguage}
         onOpenWifi={() => setIsWifiOpen(true)}
+        onSelectCampaign={(camp) => setSelectedCampaign(camp)}
       />
 
       {/* ==================================================== */}
@@ -342,7 +347,7 @@ function normalizeForSearch(text: string | null | undefined): string {
       />
 
       {/* ==================================================== */}
-      {/* 6. SABİT ALT AKSİYON ÇUBUĞU (Floating Bar)           */}
+      {/* 6. SABİT ALT AKSİYON ÇUBUĞU (Floating Bar - Tepsi)   */}
       {/* ==================================================== */}
       <FloatingBar
         tableNumber={tableNumber}
@@ -364,7 +369,20 @@ function normalizeForSearch(text: string | null | undefined): string {
       {/* ==================================================== */}
       {/* 8. SİPARİŞ TEPSİSİ ÇEKMECESİ                         */}
       {/* ==================================================== */}
-      <CartTrayDrawer language={language} />
+      <CartTrayDrawer
+        language={language}
+        tableNumber={tableNumber}
+      />
+
+      {/* ==================================================== */}
+      {/* 9. FIRSAT & KAMPANYA DETAY ÇEKMECESİ                 */}
+      {/* ==================================================== */}
+      <CampaignDetailDrawer
+        campaign={selectedCampaign}
+        isOpen={Boolean(selectedCampaign)}
+        onClose={() => setSelectedCampaign(null)}
+        language={language}
+      />
     </div>
   );
 }
