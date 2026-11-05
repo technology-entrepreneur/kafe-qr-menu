@@ -15,20 +15,39 @@ export default function AdminLoginPage() {
     setIsLoading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("password", password);
-
     try {
-      const res = await loginAdminAction(null, formData);
-      if (res && res.success) {
-        window.location.href = "/admin/dashboard";
+      // Doğrudan HTTP API ile çerez yazma garantisi
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // Çerez yazıldıktan sonra doğrudan yönlendir
+        window.location.replace("/admin/dashboard");
         return;
       }
-      setError(res?.error || "Giriş başarısız.");
+
+      setError(data.error || "Giriş başarısız.");
       setIsLoading(false);
-    } catch (err: any) {
-      setError("Bağlantı hatası oluştu.");
+    } catch {
+      // API başarısız olursa Server Action fallback dene
+      try {
+        const formData = new FormData();
+        formData.append("email", email);
+        formData.append("password", password);
+        const actionRes = await loginAdminAction(null, formData);
+        if (actionRes && actionRes.success) {
+          window.location.replace("/admin/dashboard");
+          return;
+        }
+        setError(actionRes?.error || "Giriş başarısız.");
+      } catch {
+        setError("Giriş yapılırken bağlantı hatası oluştu.");
+      }
       setIsLoading(false);
     }
   };

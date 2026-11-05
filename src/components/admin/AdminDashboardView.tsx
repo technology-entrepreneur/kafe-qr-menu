@@ -53,7 +53,10 @@ export default function AdminDashboardView({
   );
 
   const handleLogout = async () => {
-    await logoutAdminAction();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {}
+    window.location.replace("/admin/login");
   };
 
   return (
