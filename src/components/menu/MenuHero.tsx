@@ -56,33 +56,19 @@ export default function MenuHero({
         {/* 1. ÜST ÇUBUK: Masa Rozeti & Hızlı Butonlar           */}
         {/* ==================================================== */}
         <div className="flex items-center justify-between gap-1.5 sm:gap-2 text-xs overflow-x-auto no-scrollbar py-0.5 min-w-0">
-          {/* Sol: Masa Numarası / Masa Seç Butonu */}
+          {/* Sol: Masa Numarası (QR okutulduğunda sabit rozet olarak gösterilir, seçim yaptırmaz) */}
           <div className="shrink-0">
             {cleanTableNo ? (
-              <button
-                type="button"
-                onClick={onOpenTableModal}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-300 hover:bg-amber-500/25 font-bold text-xs shadow-sm shadow-amber-500/10 transition-all cursor-pointer whitespace-nowrap shrink-0"
-                title={t("changeTable", language)}
+              <div
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-300 font-bold text-xs shadow-sm shadow-amber-500/10 whitespace-nowrap shrink-0 select-none"
               >
                 <span className="relative flex h-2 w-2 shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
                 <span className="whitespace-nowrap">{t("table", language)} {cleanTableNo}</span>
-                <span className="text-[10px] text-amber-400/80">✏️</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onOpenTableModal}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 font-bold text-xs shadow-sm shadow-amber-500/10 transition-all cursor-pointer whitespace-nowrap shrink-0"
-                title={t("selectTablePill", language)}
-              >
-                <span>📍</span>
-                <span className="whitespace-nowrap">{t("selectTablePill", language)}</span>
-              </button>
-            )}
+              </div>
+            ) : null}
           </div>
 
           {/* Sağ: Karşılama, Wi-Fi, Dil Seçici */}
