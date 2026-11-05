@@ -55,70 +55,71 @@ export default function MenuHero({
         {/* ==================================================== */}
         {/* 1. ÜST ÇUBUK: Masa Rozeti & Hızlı Butonlar           */}
         {/* ==================================================== */}
-        <div className="flex items-center justify-between gap-2 text-xs">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2 text-xs overflow-x-auto no-scrollbar py-0.5 min-w-0">
           {/* Sol: Masa Numarası / Masa Seç Butonu */}
-          <div>
+          <div className="shrink-0">
             {cleanTableNo ? (
               <button
                 type="button"
                 onClick={onOpenTableModal}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-300 hover:bg-amber-500/25 font-bold text-xs shadow-sm shadow-amber-500/10 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-300 hover:bg-amber-500/25 font-bold text-xs shadow-sm shadow-amber-500/10 transition-all cursor-pointer whitespace-nowrap shrink-0"
                 title={t("changeTable", language)}
               >
-                <span className="relative flex h-2 w-2">
+                <span className="relative flex h-2 w-2 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
                 </span>
-                <span>{t("table", language)} {cleanTableNo}</span>
+                <span className="whitespace-nowrap">{t("table", language)} {cleanTableNo}</span>
                 <span className="text-[10px] text-amber-400/80">✏️</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={onOpenTableModal}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 font-bold text-xs shadow-sm shadow-amber-500/10 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 font-bold text-xs shadow-sm shadow-amber-500/10 transition-all cursor-pointer whitespace-nowrap shrink-0"
                 title={t("selectTablePill", language)}
               >
                 <span>📍</span>
-                <span>{t("selectTablePill", language)}</span>
+                <span className="whitespace-nowrap">{t("selectTablePill", language)}</span>
               </button>
             )}
           </div>
 
           {/* Sağ: Karşılama, Wi-Fi, Dil Seçici */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Giriş Hub Linki */}
             <Link
               href={tableNumber ? `/?table=${encodeURIComponent(tableNumber)}` : "/"}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-900/90 border border-stone-800 text-stone-300 hover:text-amber-300 hover:border-amber-500/30 transition-all text-xs font-medium cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-stone-900/90 border border-stone-800 text-stone-300 hover:text-amber-300 hover:border-amber-500/30 transition-all text-xs font-medium cursor-pointer shadow-sm whitespace-nowrap shrink-0"
               title={isEn ? "Welcome Hub" : "Karşılama Sayfasına Dön"}
             >
-              <ChevronLeft className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isEn ? "Home" : "Karşılama"}</span>
+              <ChevronLeft className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="hidden min-[400px]:inline">{isEn ? "Home" : "Karşılama"}</span>
+              <span className="min-[400px]:hidden">{isEn ? "Home" : "Giriş"}</span>
             </Link>
 
             {/* Wi-Fi Bilgi Butonu */}
             <button
               type="button"
               onClick={onOpenWifi}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 transition-all text-xs font-semibold cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 transition-all text-xs font-semibold cursor-pointer shadow-sm whitespace-nowrap shrink-0"
               title={isEn ? "Free Guest Wi-Fi" : "Ücretsiz Misafir Wi-Fi"}
             >
-              <Wifi className="w-3.5 h-3.5 text-amber-400" />
-              <span>Wi-Fi</span>
+              <Wifi className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="whitespace-nowrap">Wi-Fi</span>
             </button>
 
             {/* 5 Dilli Seçici Buton */}
             <button
               type="button"
               onClick={() => setIsLangModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-900/95 border border-stone-800 text-amber-300 hover:border-amber-500/40 hover:bg-stone-850 transition-all text-xs font-bold cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full bg-stone-900/95 border border-stone-800 text-amber-300 hover:border-amber-500/40 hover:bg-stone-850 transition-all text-xs font-bold cursor-pointer shadow-sm whitespace-nowrap shrink-0"
               title={t("selectLanguage", language)}
             >
-              <span className="text-sm leading-none" role="img" aria-hidden="true">
+              <span className="text-sm leading-none shrink-0" role="img" aria-hidden="true">
                 {currentLangConfig.flag}
               </span>
-              <span>{language.toUpperCase()}</span>
+              <span className="whitespace-nowrap">{language.toUpperCase()}</span>
             </button>
           </div>
         </div>

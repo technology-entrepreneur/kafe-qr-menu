@@ -41,10 +41,10 @@ export default function CategoryNav({
   if (!categories || categories.length === 0) return null;
 
   return (
-    <nav className="w-full py-2 bg-slate-950 border-b border-slate-800">
+    <nav className="w-full py-1.5 border-t border-stone-800/60">
       <div
         ref={scrollContainerRef}
-        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-4 max-w-2xl mx-auto scroll-smooth select-none"
+        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-4 max-w-2xl mx-auto scroll-smooth select-none py-0.5"
       >
         {categories.map((category) => {
           const isActive = category.id === activeCategoryId;
@@ -56,18 +56,18 @@ export default function CategoryNav({
               key={category.id}
               ref={isActive ? activeTabRef : null}
               onClick={() => onSelectCategory(category.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0 cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 cursor-pointer ${
                 isActive
-                  ? "bg-slate-800 text-white border border-slate-700"
-                  : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold shadow-sm shadow-amber-500/10"
+                  : "bg-stone-900/90 text-stone-400 hover:text-stone-200 border border-stone-800 hover:border-stone-700"
               }`}
             >
               <span>{displayName}</span>
               <span
-                className={`text-[10px] px-1 rounded tabular-nums ${
+                className={`text-[10px] px-1.5 py-0.5 rounded-full tabular-nums font-semibold ${
                   isActive
-                    ? "bg-slate-700 text-slate-200"
-                    : "bg-slate-800 text-slate-500"
+                    ? "bg-amber-500/30 text-amber-200"
+                    : "bg-stone-800 text-stone-500"
                 }`}
               >
                 {count}
