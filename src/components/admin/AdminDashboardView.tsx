@@ -271,7 +271,7 @@ export default function AdminDashboardView({
           )}
 
           {activeTab === "printers" && (
-            <PrinterManagement />
+            <PrinterManagement cafeName={settings.cafeName} />
           )}
 
           {activeTab === "settings" && (

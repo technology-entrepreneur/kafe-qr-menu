@@ -27,7 +27,7 @@ const DEFAULT_CONFIG: PrinterConfig = {
   hookah: { type: "network", ip: "192.168.1.202", port: 9100, enabled: true },
 };
 
-export default function PrinterManagement() {
+export default function PrinterManagement({ cafeName = "Kafe Menü" }: { cafeName?: string }) {
   const [config, setConfig] = useState<PrinterConfig>(DEFAULT_CONFIG);
   const [saved, setSaved] = useState(false);
   const [testingStation, setTestingStation] = useState<string | null>(null);
@@ -56,7 +56,7 @@ export default function PrinterManagement() {
 
     const testReceipt = {
       type: station === "cashier" ? "bill" : "kitchen",
-      cafeName: "Test Fişi • Gloriouss Café",
+      cafeName: `Test Fişi • ${cafeName}`,
       tableNumber: "TEST-1",
       kdsStation: station,
       createdAt: new Date(),

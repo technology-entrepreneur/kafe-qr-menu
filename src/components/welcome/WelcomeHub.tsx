@@ -145,7 +145,7 @@ export default function WelcomeHub({ tableNumber, config }: WelcomeHubProps) {
           <div className="flex items-center gap-2">
             <Wifi className="w-4 h-4 text-slate-400" />
             <span>
-              Wi-Fi: <strong className="text-white font-medium">{config.wifi.ssid || "Gloriouss_Guest"}</strong>
+              Wi-Fi: <strong className="text-white font-medium">{config.wifi.ssid || "Misafir_WiFi"}</strong>
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -192,7 +192,7 @@ export default function WelcomeHub({ tableNumber, config }: WelcomeHubProps) {
         </div>
 
         <span className="text-[11px] text-slate-500">
-          Gloriouss Café Sipariş Sistemi
+          {config.name} Sipariş Sistemi
         </span>
       </footer>
     </div>
