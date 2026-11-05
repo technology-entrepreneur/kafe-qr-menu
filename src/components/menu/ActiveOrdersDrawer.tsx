@@ -103,7 +103,7 @@ export default function ActiveOrdersDrawer({
                   {isEn ? "Table Tab" : "Masa Hesabım"}
                 </h3>
                 <span className="text-[10px] font-semibold text-slate-300 bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded">
-                  Masa {tableNumber}
+                  {isEn ? "Table" : "Masa"} {tableNumber.replace(/^(masa|table)\s*/i, "").trim()}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">

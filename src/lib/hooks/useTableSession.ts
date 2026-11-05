@@ -77,10 +77,50 @@ export function useTableSession(tableNumber: string | null | undefined) {
   }, [tableNumber]);
 
   // Sunucudan oturumu başlat/getir
+  const fetchSession = useCallback(async (isSilent = false) => {
+    if (!tableNumber) return;
+    if (!isSilent) setIsLoading(true);
+
+    try {
+      const res = await fetch(`/api/sessions/${encodeURIComponent(tableNumber)}`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.session) {
+          setSession((prev) => {
+            // Eğer yerelde bekleyen siparişler varsa kaybetme
+            const existingOrders = prev?.orders || [];
+            const serverOrders = data.session.orders || [];
+            const mergedOrderMap = new Map();
+
+            existingOrders.forEach((o: ActiveOrder) => mergedOrderMap.set(o.id, o));
+            serverOrders.forEach((o: ActiveOrder) => mergedOrderMap.set(o.id, o));
+
+            const mergedOrders = Array.from(mergedOrderMap.values());
+            const updated = {
+              ...data.session,
+              orders: mergedOrders,
+              totalAmount: mergedOrders
+                .filter((o: ActiveOrder) => o.status !== "CANCELLED")
+                .reduce((s: number, o: ActiveOrder) => s + (o.totalAmount || 0), 0),
+            };
+            saveToStorage(updated);
+            return updated;
+          });
+        }
+      }
+    } catch {
+      // Offline — cache yeterli
+    } finally {
+      if (!isSilent) setIsLoading(false);
+    }
+  }, [tableNumber, saveToStorage]);
+
+  // İlk yükleme
   const initSession = useCallback(async () => {
     if (!tableNumber || initRef.current) return;
     initRef.current = true;
-    setIsLoading(true);
 
     // Önce cache'den dene
     const cached = loadFromStorage();
@@ -88,31 +128,53 @@ export function useTableSession(tableNumber: string | null | undefined) {
       setSession(cached);
     }
 
-    try {
-      // Sunucudan doğrula / aç
-      const res = await fetch(`/api/sessions/${encodeURIComponent(tableNumber)}`, {
-        method: "POST",
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.session) {
-          setSession(data.session);
-          saveToStorage(data.session);
-        }
-      }
-    } catch {
-      // Offline — cache yeterli
-    } finally {
-      setIsLoading(false);
-    }
-  }, [tableNumber, loadFromStorage, saveToStorage]);
+    await fetchSession(Boolean(cached));
+  }, [tableNumber, loadFromStorage, fetchSession]);
 
   useEffect(() => {
     if (tableNumber) {
       initRef.current = false;
       initSession();
+
+      // Periyodik senkronizasyon (SSE yedekleme, 8 saniyede bir)
+      const interval = setInterval(() => {
+        fetchSession(true);
+      }, 8000);
+
+      return () => clearInterval(interval);
     }
-  }, [tableNumber, initSession]);
+  }, [tableNumber, initSession, fetchSession]);
+
+  // Yeni siparişi yerel oturuma anında ekleme (Optimistic + Direct Sync)
+  const addOrders = useCallback((newOrders: ActiveOrder[]) => {
+    if (!newOrders || newOrders.length === 0) return;
+
+    setSession((prev) => {
+      const currentOrders = prev?.orders || [];
+      const orderMap = new Map();
+
+      currentOrders.forEach((o) => orderMap.set(o.id, o));
+      newOrders.forEach((o) => orderMap.set(o.id, o));
+
+      const mergedOrders = Array.from(orderMap.values());
+      const newTotal = mergedOrders
+        .filter((o: ActiveOrder) => o.status !== "CANCELLED")
+        .reduce((sum: number, o: ActiveOrder) => sum + (o.totalAmount || 0), 0);
+
+      const updated: TableSessionData = {
+        id: prev?.id || `sess-local-${Date.now()}`,
+        tableNumber: tableNumber || "1",
+        sessionToken: prev?.sessionToken || `tok-${Date.now()}`,
+        status: "OPEN",
+        openedAt: prev?.openedAt || new Date().toISOString(),
+        totalAmount: newTotal,
+        orders: mergedOrders,
+      };
+
+      saveToStorage(updated);
+      return updated;
+    });
+  }, [tableNumber, saveToStorage]);
 
   // SSE olaylarını dinle
   useSSE({
@@ -210,6 +272,8 @@ export function useTableSession(tableNumber: string | null | undefined) {
     grandTotal,
     paidTotal,
     allItems,
+    addOrders,
+    refetch: () => fetchSession(false),
   };
 }
 

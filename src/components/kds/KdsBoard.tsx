@@ -137,7 +137,17 @@ export default function KdsBoard({ cafeName, initialOrders = [] }: KdsBoardProps
       const res = await fetch("/api/orders");
       if (res.ok) {
         const data = await res.json();
-        if (data.orders) setOrders(data.orders);
+        if (data.orders) {
+          setOrders((prev) => {
+            // Yeni sipariş var mı kontrol et, varsa ses çal
+            const prevIds = new Set(prev.map((o) => o.id));
+            const hasNewOrder = data.orders.some((o: OrderData) => !prevIds.has(o.id) && o.status === "PENDING");
+            if (hasNewOrder && prev.length > 0) {
+              playChime("order");
+            }
+            return data.orders;
+          });
+        }
       }
 
       const cRes = await fetch("/api/service-calls?status=PENDING");
@@ -157,6 +167,11 @@ export default function KdsBoard({ cafeName, initialOrders = [] }: KdsBoardProps
 
   useEffect(() => {
     fetchOrders();
+    // 5 saniyede bir arka planda sessizce canlı senkronizasyon (SSE yedeği)
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   useSSE({

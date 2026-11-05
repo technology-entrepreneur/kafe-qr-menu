@@ -228,6 +228,11 @@ export default function WaiterDashboard({
 
   useEffect(() => {
     fetchData();
+    // 5 saniyede bir sessiz arka plan senkronizasyonu
+    const interval = setInterval(() => {
+      fetchData();
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   // SSE Canlı Akışı

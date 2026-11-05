@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { broadcastSSE } from "@/lib/sseBroadcast";
+import { normalizeTableNumber } from "@/lib/tableUtils";
 
 // ============================================================
 // Fallback in-memory store (DB yoksa)
@@ -15,8 +16,9 @@ if (!g._tableSessions) g._tableSessions = new Map<string, any>();
 const memSessions: Map<string, any> = g._tableSessions;
 
 function getMemSession(tableNumber: string) {
+  const norm = normalizeTableNumber(tableNumber).toLowerCase();
   return Array.from(memSessions.values()).find(
-    (s: any) => s.tableNumber === tableNumber && s.status === "OPEN"
+    (s: any) => normalizeTableNumber(s.tableNumber).toLowerCase() === norm && s.status === "OPEN"
   ) || null;
 }
 
@@ -27,11 +29,19 @@ export async function GET(
   _req: Request,
   { params }: { params: { tableId: string } }
 ) {
-  const tableNumber = decodeURIComponent(params.tableId);
+  const rawTable = decodeURIComponent(params.tableId);
+  const normTable = normalizeTableNumber(rawTable);
 
   try {
     const session = await prisma.tableSession.findFirst({
-      where: { tableNumber, status: "OPEN" },
+      where: {
+        OR: [
+          { tableNumber: normTable },
+          { tableNumber: rawTable },
+          { tableNumber: `Masa ${normTable}` },
+        ],
+        status: "OPEN",
+      },
       include: {
         orders: {
           include: { items: true },
@@ -52,7 +62,7 @@ export async function GET(
     return NextResponse.json({ session });
   } catch {
     // DB yoksa in-memory fallback
-    const session = getMemSession(tableNumber);
+    const session = getMemSession(normTable);
     return NextResponse.json({ session });
   }
 }
@@ -64,12 +74,20 @@ export async function POST(
   req: Request,
   { params }: { params: { tableId: string } }
 ) {
-  const tableNumber = decodeURIComponent(params.tableId);
+  const rawTable = decodeURIComponent(params.tableId);
+  const tableNumber = normalizeTableNumber(rawTable) || rawTable;
 
   try {
     // Önce açık oturum var mı kontrol et
     let session = await prisma.tableSession.findFirst({
-      where: { tableNumber, status: "OPEN" },
+      where: {
+        OR: [
+          { tableNumber },
+          { tableNumber: rawTable },
+          { tableNumber: `Masa ${tableNumber}` },
+        ],
+        status: "OPEN",
+      },
       include: {
         orders: {
           include: { items: true },

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingBag, X, Trash2, Utensils, Plus, Minus, Bell,
-  CheckCircle2, AlertCircle, Loader2,
+  CheckCircle2, AlertCircle, Loader2, Receipt,
 } from "lucide-react";
 import { useMenuStore } from "@/lib/store";
 import { calculateCartSummary, formatMoney } from "@/lib/cartMath";
@@ -17,6 +17,8 @@ interface CartTrayDrawerProps {
   tableNumber?: string | null;
   sessionId?: string | null;
   onTableSelected?: (table: string) => void;
+  onOrderSuccess?: (orders: any[]) => void;
+  onOpenActiveOrders?: () => void;
 }
 
 // KDS istasyonu belirle (kategori/ürün bazlı — Mutfak / Bar / Nargile)
@@ -36,6 +38,8 @@ export default function CartTrayDrawer({
   tableNumber,
   sessionId,
   onTableSelected,
+  onOrderSuccess,
+  onOpenActiveOrders,
 }: CartTrayDrawerProps) {
   const isEn = language === "en";
   const { cart, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, clearCart } =
@@ -124,10 +128,21 @@ export default function CartTrayDrawer({
         throw new Error(errMsg);
       }
 
+      let createdOrders = [];
+      try {
+        const data = await res.json();
+        createdOrders = data.orders || [];
+      } catch {}
+
       // Başarılı — confetti + onay ekranı
       try {
         triggerGoldenConfetti(0.5, 0.5);
       } catch {}
+
+      // Masa oturumunu anında güncelle (Optimistic & Direct State Sync)
+      if (createdOrders.length > 0 && onOrderSuccess) {
+        onOrderSuccess(createdOrders);
+      }
 
       clearCart();
       setOrderSent(true);
@@ -193,11 +208,24 @@ export default function CartTrayDrawer({
                   {t("orderSentDesc", language)}
                 </p>
 
-                <div className="pt-2 w-full">
+                <div className="pt-2 w-full space-y-2">
+                  {onOpenActiveOrders && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleCloseAndReset();
+                        onOpenActiveOrders();
+                      }}
+                      className="w-full py-2.5 rounded bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-white transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow"
+                    >
+                      <Receipt className="w-3.5 h-3.5" />
+                      <span>{language === "tr" ? "Masa Hesabımı Gör" : "View Table Tab"}</span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={handleCloseAndReset}
-                    className="w-full py-2.5 rounded bg-amber-600 hover:bg-amber-500 font-semibold text-xs text-slate-950 transition-colors cursor-pointer"
+                    className="w-full py-2 rounded bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-300 transition-colors cursor-pointer"
                   >
                     {t("backToMenu", language)}
                   </button>

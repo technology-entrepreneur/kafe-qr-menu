@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { broadcastSSE } from "@/lib/sseBroadcast";
+import { normalizeTableNumber } from "@/lib/tableUtils";
 
 // ============================================================
 // In-memory fallback
@@ -17,28 +18,48 @@ const memOrders: Map<string, any> = g._orders;
 if (!g._tableSessions) g._tableSessions = new Map<string, any>();
 const memSessions: Map<string, any> = g._tableSessions;
 
+function getMemSession(tableNumber: string) {
+  const norm = normalizeTableNumber(tableNumber).toLowerCase();
+  return Array.from(memSessions.values()).find(
+    (s: any) => normalizeTableNumber(s.tableNumber).toLowerCase() === norm && s.status === "OPEN"
+  ) || null;
+}
+
 // ============================================================
 // GET — Oturuma ait siparişleri getir
 // ============================================================
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const sessionId = url.searchParams.get("sessionId");
-  const tableNumber = url.searchParams.get("tableNumber");
+  const rawTable = url.searchParams.get("tableNumber");
+  const tableNumber = rawTable ? normalizeTableNumber(rawTable) : null;
 
   try {
     const orders = await prisma.order.findMany({
       where: {
         ...(sessionId ? { sessionId } : {}),
-        ...(tableNumber ? { tableNumber } : {}),
+        ...(tableNumber
+          ? {
+              OR: [
+                { tableNumber },
+                { tableNumber: rawTable! },
+                { tableNumber: `Masa ${tableNumber}` },
+              ],
+            }
+          : {}),
       },
       include: { items: true },
       orderBy: { createdAt: "asc" },
     });
     return NextResponse.json({ orders });
   } catch {
-    const orders = Array.from(memOrders.values()).filter((o) =>
-      sessionId ? o.sessionId === sessionId : tableNumber ? o.tableNumber === tableNumber : true
-    );
+    const orders = Array.from(memOrders.values()).filter((o) => {
+      if (sessionId) return o.sessionId === sessionId;
+      if (tableNumber) {
+        return normalizeTableNumber(o.tableNumber).toLowerCase() === tableNumber.toLowerCase();
+      }
+      return true;
+    });
     return NextResponse.json({ orders });
   }
 }
@@ -58,12 +79,14 @@ export async function POST(req: Request) {
   const body = await req.json();
   const {
     sessionId,
-    tableNumber,
+    tableNumber: rawTable,
     source = "customer",
     items,
     notes,
     totalAmount,
   } = body;
+
+  const tableNumber = normalizeTableNumber(rawTable) || rawTable;
 
   if (!sessionId || !tableNumber || !items || items.length === 0) {
     return NextResponse.json({ error: "Eksik parametre" }, { status: 400 });
@@ -142,12 +165,22 @@ export async function POST(req: Request) {
       memOrders.set(order.id, order);
 
       // Masa oturum tutarını güncelle
-      const session = memSessions.get(sessionId);
-      if (session) {
-        session.totalAmount = (session.totalAmount || 0) + amount;
-        session.orders = session.orders || [];
-        session.orders.push(order);
+      let session = memSessions.get(sessionId) || getMemSession(tableNumber);
+      if (!session) {
+        session = {
+          id: sessionId,
+          tableNumber,
+          sessionToken: Math.random().toString(36).slice(2),
+          status: "OPEN",
+          openedAt: new Date().toISOString(),
+          totalAmount: 0,
+          orders: [],
+        };
+        memSessions.set(session.id, session);
       }
+      session.totalAmount = (session.totalAmount || 0) + amount;
+      session.orders = session.orders || [];
+      session.orders.push(order);
 
       return order;
     }

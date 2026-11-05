@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { broadcastSSE } from "@/lib/sseBroadcast";
+import { normalizeTableNumber } from "@/lib/tableUtils";
 
 // ============================================================
 // In-memory fallback
@@ -19,24 +20,32 @@ const memCalls: Map<string, any> = g._serviceCalls;
 // ============================================================
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const tableNumber = url.searchParams.get("tableNumber");
+  const rawTable = url.searchParams.get("tableNumber");
+  const tableNumber = rawTable ? normalizeTableNumber(rawTable) : null;
   const status = url.searchParams.get("status") || "PENDING";
 
   try {
     const calls = await prisma.serviceCall.findMany({
       where: {
-        ...(tableNumber ? { tableNumber } : {}),
+        ...(tableNumber
+          ? {
+              OR: [
+                { tableNumber },
+                { tableNumber: rawTable! },
+                { tableNumber: `Masa ${tableNumber}` },
+              ],
+            }
+          : {}),
         status,
       },
       orderBy: { createdAt: "asc" },
     });
     return NextResponse.json({ calls });
   } catch {
-    const calls = Array.from(memCalls.values()).filter(
-      (c: any) =>
-        (!tableNumber || c.tableNumber === tableNumber) &&
-        c.status === status
-    );
+    const calls = Array.from(memCalls.values()).filter((c: any) => {
+      const matchTable = !tableNumber || normalizeTableNumber(c.tableNumber).toLowerCase() === tableNumber.toLowerCase();
+      return matchTable && c.status === status;
+    });
     return NextResponse.json({ calls });
   }
 }
@@ -48,7 +57,8 @@ export async function GET(req: Request) {
 // ============================================================
 export async function POST(req: Request) {
   const body = await req.json();
-  const { sessionId, tableNumber, type, notes, paymentNote } = body;
+  const { sessionId, tableNumber: rawTable, type, notes, paymentNote } = body;
+  const tableNumber = normalizeTableNumber(rawTable) || rawTable;
 
   if (!sessionId || !tableNumber || !type) {
     return NextResponse.json({ error: "Eksik parametre" }, { status: 400 });

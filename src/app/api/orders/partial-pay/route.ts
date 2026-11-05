@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { broadcastSSE } from "@/lib/sseBroadcast";
+import { normalizeTableNumber } from "@/lib/tableUtils";
 
 const g = globalThis as any;
 if (!g._orders) g._orders = new Map<string, any>();
@@ -9,7 +10,8 @@ const memOrders: Map<string, any> = g._orders;
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { tableNumber, itemIds } = body;
+    const { tableNumber: rawTable, itemIds } = body;
+    const tableNumber = normalizeTableNumber(rawTable) || rawTable;
 
     if (!tableNumber || !itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
       return NextResponse.json(
@@ -35,7 +37,7 @@ export async function POST(req: Request) {
     } catch {
       // In-memory fallback
       const orders = Array.from(memOrders.values()).filter(
-        (o: any) => o.tableNumber === tableNumber
+        (o: any) => normalizeTableNumber(o.tableNumber).toLowerCase() === tableNumber.toLowerCase()
       );
 
       for (const ord of orders) {

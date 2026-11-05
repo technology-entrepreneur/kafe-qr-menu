@@ -80,6 +80,8 @@ export default function MenuClientView({
     sessionReset,
     totalAmount: activeTableTotal,
     allItems: activeTableItems,
+    addOrders,
+    refetch: refetchSession,
   } = useTableSession(activeTableNumber);
 
   // Arama Sorgusu & Debounce
@@ -486,6 +488,7 @@ export default function MenuClientView({
             if (!activeTableNumber) {
               setIsTableModalOpen(true);
             } else {
+              refetchSession();
               setIsActiveOrdersOpen(true);
             }
           }}
@@ -519,6 +522,14 @@ export default function MenuClientView({
           tableNumber={activeTableNumber}
           sessionId={session?.id}
           onTableSelected={(tbl) => setActiveTableNumber(tbl)}
+          onOrderSuccess={(orders) => {
+            addOrders(orders);
+            refetchSession();
+          }}
+          onOpenActiveOrders={() => {
+            refetchSession();
+            setIsActiveOrdersOpen(true);
+          }}
         />
       )}
 
