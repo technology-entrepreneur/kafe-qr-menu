@@ -86,6 +86,28 @@ const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   },
 ];
 
+// Security & FinOps: In-Memory Sliding Window Rate Limiter
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const MAX_REQUESTS_PER_MINUTE = 20;
+
+function isRateLimited(identifier: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(identifier);
+
+  if (!record || now > record.resetAt) {
+    rateLimitMap.set(identifier, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+
+  if (record.count >= MAX_REQUESTS_PER_MINUTE) {
+    return true;
+  }
+
+  record.count += 1;
+  return false;
+}
+
 interface CartItemSummary {
   name: string;
   quantity: number;
@@ -199,6 +221,18 @@ export async function POST(req: NextRequest) {
     }
 
     const displayTable = tableNumber ?? tableId;
+
+    // Security & FinOps Guard: Rate Limiting per Table / IP (Max 20 req/min)
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0] || 'local';
+    const rateLimitKey = `${clientIp}_table_${displayTable}`;
+
+    if (isRateLimited(rateLimitKey)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a moment before sending another message.' },
+        { status: 429 }
+      );
+    }
+
     const lastUserMsg = messages[messages.length - 1]?.content || '';
 
     // ZERO-COST FAILSAFE: If no OpenAI key or set to mock, run 100% offline & free

@@ -14,6 +14,20 @@ const UPSELL_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 let cachedMenu: { timestamp: number; products: any[] } | null = null;
 const MENU_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+// Rate limiter for upselling requests
+const upsellRateLimit = new Map<string, { count: number; resetAt: number }>();
+function isUpsellRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = upsellRateLimit.get(ip);
+  if (!entry || now > entry.resetAt) {
+    upsellRateLimit.set(ip, { count: 1, resetAt: now + 60000 });
+    return false;
+  }
+  if (entry.count >= 30) return true;
+  entry.count++;
+  return false;
+}
+
 export type TimeOfDay = 'breakfast' | 'lunch' | 'dinner' | 'late_night';
 
 interface CartInputItem {
@@ -116,6 +130,14 @@ function getHeuristicRecommendations(
 
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0] || 'local';
+    if (isUpsellRateLimited(clientIp)) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please wait a moment.', recommendations: [] },
+        { status: 429 }
+      );
+    }
+
     const body: UpsellRequestBody = await req.json();
     const { cartItems = [], timeOfDay: requestedTime, language = 'tr' } = body;
 
