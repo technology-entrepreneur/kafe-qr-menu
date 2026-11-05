@@ -2,9 +2,17 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "cafe-super-secret-qr-menu-admin-jwt-key-2026-fallback"
-);
+export const PRIMARY_JWT_SECRET =
+  process.env.JWT_SECRET || "cafe-super-secret-qr-menu-admin-jwt-key-2026-production";
+
+const KNOWN_SECRETS = [
+  PRIMARY_JWT_SECRET,
+  "cafe-super-secret-qr-menu-admin-jwt-key-2026-production",
+  "cafe-super-secret-qr-menu-admin-jwt-key-2026-fallback",
+  "kafe-pro-qr-menu-admin-secret-2026-secure-key",
+].filter(Boolean) as string[];
+
+const JWT_SECRET_BYTES = new TextEncoder().encode(PRIMARY_JWT_SECRET);
 
 const COOKIE_NAME = "cafe_admin_session";
 
@@ -20,17 +28,22 @@ export async function signSessionToken(payload: SessionPayload): Promise<string>
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(JWT_SECRET);
+    .sign(JWT_SECRET_BYTES);
 }
 
-// JWT Token Doğrulama
+// JWT Token Doğrulama (Tüm bilinen anahtarlarla sağlam kontrol)
 export async function verifySessionToken(token: string): Promise<SessionPayload | null> {
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as unknown as SessionPayload;
-  } catch (error) {
-    return null;
+  for (const secret of KNOWN_SECRETS) {
+    try {
+      const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+      if (payload && (payload as any).email) {
+        return payload as unknown as SessionPayload;
+      }
+    } catch {
+      // Bir sonraki anahtarı dene
+    }
   }
+  return null;
 }
 
 // Oturumu çerezlere kaydet

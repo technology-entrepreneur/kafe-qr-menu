@@ -1,4 +1,10 @@
-import { getCategoriesWithProducts, getBusinessSettings, getCampaigns } from "@/lib/data";
+import {
+  getCategoriesWithProducts,
+  getBusinessSettings,
+  getCampaigns,
+  initialCategories,
+  initialCampaigns,
+} from "@/lib/data";
 import { getAdminSession } from "@/lib/auth";
 import AdminDashboardView from "@/components/admin/AdminDashboardView";
 import { CategoryItem, CampaignItem, BusinessSettingsData } from "@/lib/types";
@@ -22,16 +28,29 @@ export default async function AdminDashboardPage() {
   let settings: BusinessSettingsData | null = null;
 
   try {
-    const results = await Promise.all([
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("DB Timeout")), 1200)
+    );
+    const dbPromise = Promise.all([
       getCategoriesWithProducts(false), // Admin tüm kategorileri görür
       getCampaigns(false), // Admin tüm kampanyaları görür
       getBusinessSettings(),
     ]);
+
+    const results = (await Promise.race([dbPromise, timeoutPromise])) as any;
     categories = results[0] || [];
     campaigns = results[1] || [];
     settings = results[2];
   } catch {
-    // Veritabanı gecikirse veya hata verirse fallback verileri kullan
+    // Veritabanı gecikirse veya hata verirse anında fallback verileri kullan
+  }
+
+  if (!categories || categories.length === 0) {
+    categories = initialCategories;
+  }
+
+  if (!campaigns || campaigns.length === 0) {
+    campaigns = initialCampaigns;
   }
 
   return (
