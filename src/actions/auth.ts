@@ -21,35 +21,35 @@ export async function loginAdminAction(
     return { success: false, error: "Lütfen e-posta ve şifrenizi girin." };
   }
 
-  const admin = await getAdminByEmail(email);
-
-  // Eğer admin bulunamadıysa varsayılan geliştirme admin kontrolü
-  let isValid = false;
-  let adminId = "";
-  let adminName = "Kafe Yöneticisi";
-
-  // Varsayılan demo yönetici doğrudan doğrulaması
+  // 1. ÖNCELİK: Varsayılan Yönetici Girişi (Veritabanı beklemeden ANINDA doğrula!)
   if (email.toLowerCase() === "admin@kafe.com" && password === "admin123") {
-    isValid = true;
-    adminId = admin?.id || "admin-default";
-    adminName = admin?.name || "Kafe Yöneticisi";
-  } else if (admin) {
-    isValid = await comparePassword(password, admin.passwordHash);
-    adminId = admin.id;
-    adminName = admin.name || "Yönetici";
+    await setAdminSession({
+      userId: "admin-default",
+      email: "admin@kafe.com",
+      name: "Kafe Yöneticisi",
+    });
+    return { success: true };
   }
 
-  if (!isValid) {
-    return { success: false, error: "Hatalı e-posta veya şifre!" };
+  // 2. ÖNCELİK: Veritabanı Yöneticisi (Varsa güvenli kontrol)
+  try {
+    const admin = await getAdminByEmail(email);
+    if (admin && admin.passwordHash) {
+      const isValid = await comparePassword(password, admin.passwordHash);
+      if (isValid) {
+        await setAdminSession({
+          userId: admin.id,
+          email: admin.email,
+          name: admin.name || "Yönetici",
+        });
+        return { success: true };
+      }
+    }
+  } catch {
+    // Veritabanı hatası durumunda sessizce geç
   }
 
-  await setAdminSession({
-    userId: adminId,
-    email,
-    name: adminName,
-  });
-
-  return { success: true };
+  return { success: false, error: "Hatalı e-posta veya şifre!" };
 }
 
 export async function logoutAdminAction() {

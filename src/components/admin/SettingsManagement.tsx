@@ -505,6 +505,37 @@ export default function SettingsManagement({
           </button>
         </div>
       </form>
+
+      {/* SIFIR KİLOMETRE TESLİMAT KUTUSU */}
+      <div className="rounded-lg bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-950/60 p-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+              <span>🧹</span>
+              <span>Sıfır Kilometre Fabrika Sıfırlaması (Test Temizliği)</span>
+            </h4>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Tüm test masalarını, açık adisyonları ve bekleyen garson çağrılarını temizler. Menü ürünleriniz ve ayarlarınız korunur.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              if (confirm("Tüm test siparişleri ve masalar sıfırlanacak. Devam edilsin mi?")) {
+                try {
+                  const res = await fetch("/api/reset", { method: "POST" });
+                  if (res.ok) alert("Sistem 0 KM temizlendi! Masalar ve siparişler sıfırlandı.");
+                } catch {
+                  alert("Hata oluştu.");
+                }
+              }
+            }}
+            className="px-3 py-1.5 rounded bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-300 hover:bg-rose-100 text-xs font-semibold cursor-pointer transition-colors shrink-0"
+          >
+            Masaları Sıfırla (0 KM)
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
