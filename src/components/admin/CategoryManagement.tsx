@@ -168,15 +168,15 @@ export default function CategoryManagement({ categories }: CategoryManagementPro
 
       {/* Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-stone-900 p-6 shadow-2xl border border-stone-200 dark:border-stone-800">
-            <h3 className="text-lg font-bold font-display text-stone-900 dark:text-stone-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="w-full max-w-sm rounded-lg bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-800">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
               {editingCategory ? "Kategoriyi Düzenle" : "Yeni Kategori Ekle"}
             </h3>
 
             {formError && (
-              <div className="mt-3 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-semibold">
-                ⚠️ {formError}
+              <div className="mt-3 p-2.5 rounded bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-medium">
+                {formError}
               </div>
             )}
 

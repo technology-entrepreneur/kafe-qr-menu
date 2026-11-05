@@ -279,15 +279,15 @@ export default function ProductManagement({
 
       {/* Ürün Ekle / Düzenle Modal Formu */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-stone-900 p-6 shadow-2xl border border-stone-200 dark:border-stone-800 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold font-display text-stone-900 dark:text-stone-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="relative w-full max-w-lg rounded-lg bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
               {editingProduct ? "Ürünü Düzenle" : "Yeni Ürün Ekle"}
             </h3>
 
             {formError && (
-              <div className="mt-3 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-semibold">
-                ⚠️ {formError}
+              <div className="mt-3 p-2.5 rounded bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-medium">
+                {formError}
               </div>
             )}
 
@@ -367,10 +367,10 @@ export default function ProductManagement({
                     className="w-full rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-2.5 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   >
                     <option value="">Rozet Yok</option>
-                    <option value="chef">⭐ Şefin Seçimi (Chef)</option>
-                    <option value="popular">❤️ Çok Sevilen (Popular)</option>
-                    <option value="deal">🔥 Günün Fırsatı (Deal)</option>
-                    <option value="new">✨ Yeni Lezzet (New)</option>
+                    <option value="chef">Şefin Seçimi (Chef)</option>
+                    <option value="popular">Çok Satan (Popular)</option>
+                    <option value="deal">Günün Fırsatı (Deal)</option>
+                    <option value="new">Yeni Lezzet (New)</option>
                   </select>
                 </div>
               </div>

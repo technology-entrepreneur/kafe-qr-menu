@@ -106,7 +106,17 @@ export async function toggleProductStockAction(id: string): Promise<ActionResult
   const IdSchema = z.string().min(1, { message: "Geçersiz ürün ID" });
 
   return runAdminAction(IdSchema, cleanId, async (validId) => {
-    await toggleProductStock(validId);
+    const updated = await toggleProductStock(validId);
+    
+    // SSE ile anlık canlı menülere broadcast et (86'ing)
+    try {
+      const { broadcastSSE } = await import("@/lib/sseBroadcast");
+      broadcastSSE("product_availability_changed", {
+        productId: validId,
+        isAvailable: updated?.isAvailable ?? false,
+      });
+    } catch {}
+
     revalidatePath("/menu");
     revalidatePath("/admin/dashboard");
     return { success: true };

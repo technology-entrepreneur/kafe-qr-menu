@@ -206,6 +206,16 @@ export const BusinessSettingsSchema = z.object({
     .max(20)
     .optional()
     .nullable(),
+  // Modüler B2B İşletme Ayarları
+  businessType: z.string().optional().nullable(),
+  isCatalogOnly: z.boolean().optional(),
+  hookahMode: z.boolean().optional(),
+  enableWaiterCall: z.boolean().optional(),
+  enableBillRequest: z.boolean().optional(),
+  enableQuickWifiBar: z.boolean().optional(),
+  enableGoogleReviewPrompt: z.boolean().optional(),
+  hookahCoalTimerMinutes: z.number().int().optional(),
+  hookahCoalCooldownMinutes: z.number().int().optional(),
 });
 
 export type BusinessSettingsInput = z.infer<typeof BusinessSettingsSchema>;

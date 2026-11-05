@@ -72,7 +72,7 @@ export default function ProductModal({ onOpenAnotherProduct }: ProductModalProps
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: "100%", opacity: 0 }}
           transition={{ type: "spring", damping: 28, stiffness: 280 }}
-          className="relative w-full max-w-lg overflow-hidden rounded-t-[2.5rem] sm:rounded-3xl bg-white dark:bg-stone-900 shadow-2xl border border-stone-200 dark:border-stone-800 z-10 max-h-[92vh] flex flex-col font-sans"
+          className="relative w-full max-w-lg overflow-hidden rounded-t-xl sm:rounded-lg bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-800 z-10 max-h-[92vh] flex flex-col font-sans"
         >
           {/* Mobil Sürükleme Çubuğu */}
           <div className="sm:hidden mx-auto my-2.5 h-1.5 w-12 rounded-full bg-stone-300 dark:bg-stone-700" />

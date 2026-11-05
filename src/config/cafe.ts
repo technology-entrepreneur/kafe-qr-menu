@@ -53,26 +53,26 @@ export interface CafeConfig {
 export const defaultCafeConfig: CafeConfig = {
   name: "Gloriouss Café",
   tagline: "Cafe, Restaurant & Lounge",
-  welcomeSubtitle: "Eşsiz lezzetler ve keyifli anların buluşma noktası ✨",
+  welcomeSubtitle: "Siparişinizi masanızdan kolayca verin ve takip edin.",
   logoUrl: "/images/logo.png",
   tableBadgePrefix: "Masa",
   rating: {
     score: 4.9,
     starsCount: 5,
-    countText: "500+ Mutlu Misafir",
+    countText: "500+ Yorum",
     label: "Google Puanı",
   },
   actions: {
     menu: {
       title: "Menüyü İncele",
-      subtitle: "Zengin lezzetler, içecekler ve tatlılar",
-      badgeText: "HIZLI SİPARİŞ",
+      subtitle: "Yiyecek, içecek ve tatlı çeşitleri",
+      badgeText: "SİPARİŞ",
       path: "/menu",
     },
     googleReview: {
       title: "Google'da Değerlendirin",
-      subtitle: "Bizi Puanlayın & Fikrinizi Paylaşın",
-      badgeText: "⭐️ 4.9 (500+ Mutlu Misafir)",
+      subtitle: "Görüş ve puanınızı paylaşın",
+      badgeText: "4.9 Puan",
       url: "https://maps.google.com/?q=Gloriouss+Cafe+Silivri",
     },
   },

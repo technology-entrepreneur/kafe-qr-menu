@@ -69,21 +69,21 @@ export default function MenuHeader({
             {/* Karşılama Hub'ına Dönüş */}
             <Link
               href={tableNumber ? `/?table=${encodeURIComponent(tableNumber)}` : "/"}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-stone-900 border border-stone-800 text-stone-300 hover:text-amber-300 hover:border-amber-500/30 transition-all text-[11px] font-medium"
-              title={isEn ? "Return to Welcome Hub" : "Karşılama Merkezine Dön"}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors text-[11px] font-medium"
+              title={isEn ? "Home" : "Giriş"}
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>{isEn ? "Hub" : "Giriş"}</span>
+              <Coffee className="w-3.5 h-3.5 text-slate-400" />
+              <span>{isEn ? "Home" : "Giriş"}</span>
             </Link>
 
             {/* Wi-Fi Butonu */}
             <button
               type="button"
               onClick={onOpenWifi}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-stone-900 border border-stone-800 text-stone-300 hover:text-amber-300 hover:border-amber-500/30 transition-all text-[11px] font-medium cursor-pointer"
-              title={isEn ? "Free Guest Wi-Fi" : "Ücretsiz Misafir Wi-Fi"}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors text-[11px] font-medium cursor-pointer"
+              title="Wi-Fi"
             >
-              <Wifi className="w-3.5 h-3.5 text-amber-400" />
+              <Wifi className="w-3.5 h-3.5 text-slate-400" />
               <span>Wi-Fi</span>
             </button>
 
@@ -91,10 +91,10 @@ export default function MenuHeader({
             <button
               type="button"
               onClick={() => onLanguageChange(isEn ? "tr" : "en")}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 transition-all text-[11px] font-bold cursor-pointer"
-              title={isEn ? "Switch to Turkish" : "İngilizceye Geç"}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors text-[11px] font-medium cursor-pointer"
+              title={isEn ? "TR" : "EN"}
             >
-              <Globe className="w-3.5 h-3.5 text-amber-400" />
+              <Globe className="w-3.5 h-3.5 text-slate-400" />
               <span>{isEn ? "EN" : "TR"}</span>
             </button>
           </div>
@@ -105,18 +105,18 @@ export default function MenuHeader({
         {/* ==================================================== */}
         <div className="flex items-center gap-3 py-0.5">
           {/* Logo */}
-          <div className="relative w-11 h-11 flex-shrink-0 rounded-2xl bg-gradient-to-br from-stone-800 to-stone-900 border border-amber-500/25 p-0.5 shadow-md overflow-hidden">
+          <div className="relative w-10 h-10 flex-shrink-0 rounded-md bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden">
             {settings.logoUrl ? (
               <Image
                 src={settings.logoUrl}
                 alt={settings.cafeName}
-                width={44}
-                height={44}
-                className="w-full h-full object-cover rounded-[14px]"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-stone-900 rounded-[14px]">
-                <Coffee className="w-5 h-5 text-amber-400" />
+              <div className="w-full h-full flex items-center justify-center bg-slate-900">
+                <Coffee className="w-5 h-5 text-amber-500" />
               </div>
             )}
           </div>

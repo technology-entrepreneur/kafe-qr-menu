@@ -7,19 +7,18 @@ import {
   X,
   Plus,
   Minus,
-  Sparkles,
-  Flame,
   Check,
   AlertTriangle,
   Clock,
-  Heart,
   ArrowRight,
   ShoppingBag,
   Ban,
+  Coffee,
 } from "lucide-react";
 import { ProductItem, Language, SelectedExtraOption } from "@/types/menu";
 import { useMenuStore } from "@/lib/store";
 import { calculateItemUnitPrice, calculateLineTotal } from "@/lib/cartMath";
+import { t, getBadgeLabel } from "@/lib/translations";
 
 interface ProductDetailDrawerProps {
   product: ProductItem | null;
@@ -28,6 +27,7 @@ interface ProductDetailDrawerProps {
   language: Language;
   allProducts?: ProductItem[];
   onSelectProduct?: (product: ProductItem) => void;
+  isCatalogOnly?: boolean;
 }
 
 export default function ProductDetailDrawer({
@@ -37,6 +37,7 @@ export default function ProductDetailDrawer({
   language,
   allProducts = [],
   onSelectProduct,
+  isCatalogOnly = false,
 }: ProductDetailDrawerProps) {
   const isEn = language === "en";
   const [quantity, setQuantity] = useState(1);
@@ -74,15 +75,13 @@ export default function ProductDetailDrawer({
   }, [product]);
 
   const displayName =
-    product && isEn && product.nameEn ? product.nameEn : product?.name || "";
+    product && language === "tr" ? product.name : (product?.nameEn || product?.name || "");
   const displayDesc =
-    product && isEn && product.descriptionEn
-      ? product.descriptionEn
-      : product?.description || "";
+    product && language === "tr"
+      ? product.description
+      : (product?.descriptionEn || product?.description || "");
   const displayIngredients =
-    product && isEn && product.ingredientsEn && product.ingredientsEn.length > 0
-      ? product.ingredientsEn
-      : product?.ingredients || [];
+    product?.ingredients || [];
 
   // Seçenek seç/kaldır
   const handleToggleOption = (
@@ -211,28 +210,21 @@ export default function ProductDetailDrawer({
       {isOpen && product && (
         <>
           {/* Karartma Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
             onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/60"
           />
 
           {/* Çekmece Gövdesi (Bottom Sheet) */}
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 28, stiffness: 320 }}
-            className="fixed inset-x-0 bottom-0 z-50 max-w-lg mx-auto max-h-[92vh] flex flex-col rounded-t-[32px] bg-[#0c0a09] border-t border-stone-800 text-stone-100 shadow-2xl overflow-hidden"
+          <div
+            className="fixed inset-x-0 bottom-0 z-50 max-w-lg mx-auto max-h-[92vh] flex flex-col rounded-t-xl bg-slate-900 border-t border-slate-800 text-slate-100 shadow-xl overflow-hidden font-sans"
           >
             {/* Üst Çekme Çubuğu & Kapatma Butonu */}
-            <div className="relative pt-3 pb-2 flex items-center justify-center border-b border-stone-800/60 flex-shrink-0">
-              <div className="w-12 h-1.5 rounded-full bg-stone-700/80" />
+            <div className="relative pt-2.5 pb-2 flex items-center justify-center border-b border-slate-800 flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-slate-700" />
               <button
                 onClick={onClose}
-                className="absolute right-4 top-3 w-8 h-8 rounded-full bg-stone-900 border border-stone-800 text-stone-400 hover:text-white flex items-center justify-center transition-colors"
+                className="absolute right-3.5 top-2.5 w-7 h-7 rounded bg-slate-800 border border-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
                 title={isEn ? "Close" : "Kapat"}
               >
                 <X className="w-4 h-4" />
@@ -240,9 +232,9 @@ export default function ProductDetailDrawer({
             </div>
 
             {/* Kaydırılabilir İçerik Alanı */}
-            <div className="flex-1 overflow-y-auto no-scrollbar px-5 py-4 space-y-4">
+            <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-3.5 space-y-3.5">
               {/* 1. BÜYÜK GÖRSEL */}
-              <div className="relative w-full h-56 sm:h-64 rounded-2xl overflow-hidden bg-stone-900 border border-stone-800 shadow-md">
+              <div className="relative w-full h-48 sm:h-56 rounded-md overflow-hidden bg-slate-800 border border-slate-700">
                 {product.imageUrl && !imgError ? (
                   <Image
                     src={product.imageUrl}
@@ -254,20 +246,15 @@ export default function ProductDetailDrawer({
                     priority
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-4xl bg-stone-900 text-stone-500">
-                    ☕
+                  <div className="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500">
+                    <Coffee className="w-8 h-8 text-slate-600" />
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0c0a09] via-transparent to-transparent opacity-80" />
 
                 {/* Rozet */}
                 {product.badge && (
-                  <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-amber-500/90 text-stone-950 font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-md">
-                    {product.badge === "chef"
-                      ? isEn ? "Chef's Special" : "Şefin Seçimi"
-                      : product.badge === "popular"
-                      ? isEn ? "Most Popular" : "Çok Satan"
-                      : product.badge}
+                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-slate-900/90 text-amber-400 border border-slate-700 font-semibold text-[10px] uppercase tracking-wider">
+                    {getBadgeLabel(product.badge, language)}
                   </div>
                 )}
               </div>
@@ -286,14 +273,13 @@ export default function ProductDetailDrawer({
                 {/* Kalori & Hazırlanma Süresi Rozetleri */}
                 <div className="flex items-center gap-2 pt-0.5">
                   {product.calories && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-900 border border-stone-800 text-[11px] font-semibold text-stone-300">
-                      <Flame className="w-3.5 h-3.5 text-amber-500" />
-                      <span>{product.calories} kcal</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[11px] font-medium text-slate-300 tabular-nums">
+                      {product.calories} kcal
                     </span>
                   )}
                   {product.prepTimeMinutes && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-900 border border-stone-800 text-[11px] font-semibold text-stone-300">
-                      <Clock className="w-3.5 h-3.5 text-amber-500" />
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[11px] font-medium text-slate-300 tabular-nums">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
                       <span>{product.prepTimeMinutes} {isEn ? "mins" : "dk"}</span>
                     </span>
                   )}
@@ -307,21 +293,19 @@ export default function ProductDetailDrawer({
                 )}
               </div>
 
-              {/* 3. İÇİNDEKİLER & REÇETE DETAYI (Tüm Ürünlerde Görünür) */}
+              {/* 3. İÇİNDEKİLER & REÇETE DETAYI */}
               {displayIngredients.length > 0 && (
-                <div className="rounded-2xl bg-stone-900/80 border border-stone-800/90 p-3.5 space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400 uppercase tracking-wider">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>{isEn ? "Ingredients & What's Inside" : "İçindekiler & Reçete Detayı"}</span>
+                <div className="rounded-md bg-slate-950 border border-slate-800 p-3 space-y-1.5">
+                  <div className="text-xs font-semibold text-slate-300">
+                    <span>{t("ingredients", language)}</span>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     {displayIngredients.map((ing, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-800/90 border border-stone-700/60 text-xs font-medium text-stone-200"
+                        className="inline-flex items-center px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-xs text-slate-200"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
-                        <span>{ing}</span>
+                        {ing}
                       </span>
                     ))}
                   </div>
@@ -334,12 +318,10 @@ export default function ProductDetailDrawer({
                   <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <strong className="font-semibold text-amber-300">
-                      {isEn ? "Allergen Advisory:" : "Alerjen Uyarısı:"}
+                      {t("allergens", language)}:
                     </strong>{" "}
                     <span>
-                      {isEn && product.allergensEn
-                        ? product.allergensEn
-                        : product.allergens}
+                      {product.allergens}
                     </span>
                   </div>
                 </div>
@@ -421,17 +403,16 @@ export default function ProductDetailDrawer({
                 </div>
               )}
 
-              {/* 5. "BUNUNLA HARİKA GİDER" ÇAPRAZ SATIŞ ÖNERİLERİ */}
+              {/* 5. ÇAPRAZ SATIŞ ÖNERİLERİ */}
               {crossSellSuggestions.length > 0 && (
-                <div className="space-y-3 pt-2">
+                <div className="space-y-2 pt-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>{isEn ? "Pairs Perfectly With" : "Bununla Harika Gider"}</span>
+                    <h3 className="text-xs font-semibold text-slate-300">
+                      <span>{isEn ? "Recommended with this" : "Birlikte İyi Gider"}</span>
                     </h3>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-2 gap-2">
                     {crossSellSuggestions.slice(0, 2).map((item) => (
                       <button
                         key={item.id}
@@ -441,23 +422,23 @@ export default function ProductDetailDrawer({
                             onSelectProduct(item);
                           }
                         }}
-                        className="group flex flex-col p-2.5 rounded-xl bg-stone-900/90 border border-stone-800 hover:border-amber-500/40 text-left transition-all"
+                        className="group flex flex-col p-2 rounded bg-slate-950 border border-slate-800 hover:border-slate-700 text-left transition-colors"
                       >
-                        <div className="relative w-full h-20 rounded-lg overflow-hidden mb-2 bg-stone-800">
+                        <div className="relative w-full h-16 rounded overflow-hidden mb-1.5 bg-slate-800">
                           {item.imageUrl && (
                             <Image
                               src={item.imageUrl}
                               alt={item.name}
                               fill
                               sizes="120px"
-                              className="object-cover group-hover:scale-105 transition-transform"
+                              className="object-cover"
                             />
                           )}
                         </div>
-                        <span className="text-xs font-bold text-stone-200 line-clamp-1 group-hover:text-amber-300">
+                        <span className="text-xs font-medium text-slate-200 line-clamp-1">
                           {isEn && item.nameEn ? item.nameEn : item.name}
                         </span>
-                        <span className="text-[11px] font-bold text-amber-400 mt-1">
+                        <span className="text-[11px] font-semibold text-amber-400 mt-0.5 tabular-nums">
                           ₺{item.price}
                         </span>
                       </button>
@@ -467,78 +448,81 @@ export default function ProductDetailDrawer({
               )}
             </div>
 
-            {/* ==================================================== */}
-            {/* ALT SABİT AKSİYON: MİKTAR & SİPARİŞE EKLE BUTONU     */}
-            {/* ==================================================== */}
-            <div className="p-4 border-t border-stone-800 bg-[#0c0a09]/95 backdrop-blur-md flex flex-col gap-2.5">
-              {/* Varsa Doğrulama veya Stok Uyarısı */}
+            {/* ALT SABİT AKSİYON: MİKTAR & SİPARİŞE EKLE BUTONU */}
+            <div className="p-3.5 border-t border-slate-800 bg-slate-950 flex flex-col gap-2">
               {validationError && (
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold animate-pulse">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-400" />
+                <div className="flex items-center gap-1.5 p-2 rounded bg-rose-950/60 border border-rose-800 text-rose-300 text-xs font-medium">
+                  <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 text-rose-400" />
                   <span>{validationError}</span>
                 </div>
               )}
 
-              <div className="flex items-center gap-3">
-                {product.isAvailable ? (
+              <div className="flex items-center gap-2">
+                {isCatalogOnly ? (
+                  <div className="w-full flex items-center justify-between p-2.5 rounded bg-slate-900 border border-slate-800 text-xs text-slate-300">
+                    <span className="text-slate-400">
+                      {isEn ? "Digital Catalog (Order via waiter)" : "Görsel Menü (Sipariş için garsona iletin)"}
+                    </span>
+                    <span className="font-bold text-amber-400 tabular-nums text-sm">
+                      ₺{unitPrice.toLocaleString("tr-TR")}
+                    </span>
+                  </div>
+                ) : product.isAvailable ? (
                   <>
-                    {/* Miktar Seçici (- 1 +) */}
-                    <div className="flex items-center gap-2 rounded-2xl bg-stone-900 border border-stone-800 p-1.5">
+                    <div className="flex items-center gap-1.5 rounded bg-slate-900 border border-slate-800 p-1">
                       <button
                         type="button"
                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 flex items-center justify-center transition-colors"
+                        className="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition-colors"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="w-6 text-center font-bold text-sm text-stone-100">
+                      <span className="w-5 text-center font-bold text-xs text-white tabular-nums">
                         {quantity}
                       </span>
                       <button
                         type="button"
                         onClick={() => setQuantity((q) => q + 1)}
-                        className="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 flex items-center justify-center transition-colors"
+                        className="w-7 h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
 
-                    {/* Siparişe Ekle / Onayla Butonu */}
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                    <button
+                      type="button"
                       onClick={handleAddToCart}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold text-sm shadow-xl transition-all duration-300 ${
+                      className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded font-semibold text-xs transition-colors ${
                         addedToast
-                          ? "bg-emerald-500 text-stone-950 shadow-emerald-500/25"
-                          : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 shadow-amber-500/20"
+                          ? "bg-emerald-600 text-white"
+                          : "bg-amber-600 hover:bg-amber-500 text-slate-950"
                       }`}
                     >
                       {addedToast ? (
                         <>
-                          <Check className="w-4 h-4 stroke-[3]" />
-                          <span>{isEn ? "Added to Order!" : "Siparişe Eklendi!"}</span>
+                          <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                          <span>✓</span>
                         </>
                       ) : (
                         <>
-                          <ShoppingBag className="w-4 h-4 stroke-[2.5]" />
-                          <span>{isEn ? "Add to Order" : "Siparişe Ekle"}</span>
-                          <span className="font-extrabold tracking-tight">
+                          <ShoppingBag className="w-3.5 h-3.5" />
+                          <span>{t("addToCart", language)}</span>
+                          <span className="font-bold tabular-nums">
                             • ₺{totalPrice.toLocaleString("tr-TR")}
                           </span>
                         </>
                       )}
-                    </motion.button>
+                    </button>
                   </>
                 ) : (
-                  <div className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl font-bold text-sm bg-stone-900 border border-stone-800 text-stone-400">
+                  <div className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded font-medium text-xs bg-slate-900 border border-slate-800 text-slate-400">
                     <Ban className="w-4 h-4 text-rose-400" />
-                    <span>{isEn ? "Currently Sold Out" : "Bu Ürün Şu An Tükendi"}</span>
+                    <span>{t("outOfStock", language)}</span>
                   </div>
                 )}
               </div>
             </div>
-          </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

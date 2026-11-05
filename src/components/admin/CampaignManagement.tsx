@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit2, Trash2, Flame, CheckCircle, XCircle, Sparkles, Upload } from "lucide-react";
+import { Plus, Edit2, Trash2, Tag, CheckCircle, XCircle, Image as ImageIcon, Upload } from "lucide-react";
 import { CampaignItem } from "@/lib/types";
 import {
   addCampaignAction,
@@ -100,18 +100,18 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
       {/* Üst Başlık & Ekle Butonu */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold font-display text-stone-900 dark:text-stone-100 flex items-center gap-2">
-            <Flame className="h-5 w-5 text-amber-500 fill-amber-500" />
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Tag className="h-5 w-5 text-amber-500" />
             <span>Fırsat & Kampanya Yönetimi ({campaigns.length})</span>
           </h2>
-          <p className="text-xs text-stone-500 dark:text-stone-400">
-            QR menünün en tepesinde sergilenen ve ortalama sepet tutarını (AOV) artıran kampanya kartları.
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            QR menünün üst kısmında yer alan kampanya ve teklif kartları.
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="flex items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-amber-700 active:scale-95 transition-all"
+          className="flex items-center gap-1.5 rounded-md bg-amber-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-amber-500 transition-colors cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           <span>Yeni Kampanya Ekle</span>
@@ -123,10 +123,10 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
         {campaigns.map((camp) => (
           <div
             key={camp.id}
-            className="overflow-hidden rounded-2xl bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-sm flex flex-col justify-between"
+            className="overflow-hidden rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between"
           >
             {/* Görsel ve Rozet */}
-            <div className="relative h-36 w-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+            <div className="relative h-36 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
               {camp.imageUrl ? (
                 <img
                   src={camp.imageUrl}
@@ -134,58 +134,58 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-stone-400">
-                  <Sparkles className="h-8 w-8" />
+                <div className="flex h-full w-full items-center justify-center text-slate-400">
+                  <ImageIcon className="h-8 w-8 stroke-[1.5]" />
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
               {camp.badgeText && (
-                <div className="absolute top-3 left-3">
-                  <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-black uppercase text-stone-950 shadow">
+                <div className="absolute top-2.5 left-2.5">
+                  <span className="rounded bg-amber-600 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
                     {camp.badgeText}
                   </span>
                 </div>
               )}
 
               <div className="absolute bottom-2 left-3 right-3 text-white">
-                <p className="font-extrabold text-sm line-clamp-1">{camp.title}</p>
+                <p className="font-bold text-sm line-clamp-1">{camp.title}</p>
               </div>
             </div>
 
             {/* Bilgiler */}
-            <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+            <div className="p-3.5 space-y-3 flex-1 flex flex-col justify-between">
               {camp.subtitle && (
-                <p className="text-xs text-stone-600 dark:text-stone-300 line-clamp-2">
+                <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">
                   {camp.subtitle}
                 </p>
               )}
 
-              <div className="flex items-center justify-between border-t border-stone-100 dark:border-stone-800 pt-2 text-xs">
+              <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-2 text-xs">
                 <div>
                   {camp.discountedPrice ? (
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="font-bold text-amber-700 dark:text-amber-400 text-sm">
+                    <div className="flex items-baseline gap-1.5 tabular-nums">
+                      <span className="font-bold text-amber-600 dark:text-amber-400 text-sm">
                         ₺{camp.discountedPrice}
                       </span>
                       {camp.originalPrice && (
-                        <span className="text-[11px] text-stone-400 line-through">
+                        <span className="text-[11px] text-slate-400 line-through">
                           ₺{camp.originalPrice}
                         </span>
                       )}
                     </div>
                   ) : (
-                    <span className="font-semibold text-stone-400">Özel Menü Fırsatı</span>
+                    <span className="font-medium text-slate-400">Özel Menü Fırsatı</span>
                   )}
                 </div>
 
                 {/* Durum Butonu */}
                 <button
                   onClick={() => handleToggleStatus(camp.id, camp.isActive)}
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                  className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-semibold ${
                     camp.isActive
                       ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                      : "bg-stone-100 dark:bg-stone-800 text-stone-500 border border-stone-300 dark:border-stone-700"
+                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-300 dark:border-slate-700"
                   }`}
                 >
                   {camp.isActive ? (
@@ -203,17 +203,17 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
               </div>
 
               {/* İşlemler */}
-              <div className="flex items-center justify-end gap-1.5 border-t border-stone-100 dark:border-stone-800 pt-2">
+              <div className="flex items-center justify-end gap-1.5 border-t border-slate-100 dark:border-slate-800 pt-2">
                 <button
                   onClick={() => handleOpenEdit(camp)}
-                  className="rounded-lg p-1.5 text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800"
+                  className="rounded p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                   title="Düzenle"
                 >
                   <Edit2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => handleDelete(camp.id, camp.title)}
-                  className="rounded-lg p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50"
+                  className="rounded p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50"
                   title="Sil"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -226,21 +226,21 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
 
       {/* Kampanya Ekle / Düzenle Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-stone-900 p-6 shadow-2xl border border-stone-200 dark:border-stone-800 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold font-display text-stone-900 dark:text-stone-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="relative w-full max-w-lg rounded-lg bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
               {editingCampaign ? "Kampanyayı Düzenle" : "Yeni Kampanya Oluştur"}
             </h3>
 
             {formError && (
-              <div className="mt-3 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-semibold">
-                ⚠️ {formError}
+              <div className="mt-3 p-2.5 rounded bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 text-rose-600 dark:text-rose-400 text-xs font-medium">
+                {formError}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Kampanya Başlığı *
                 </label>
                 <input
@@ -249,12 +249,12 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
                   required
                   defaultValue={editingCampaign?.title || ""}
                   placeholder="Örn: Latte + Brownie Menüsü"
-                  className="w-full rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-2.5 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-amber-500"
+                  className="w-full rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Alt Başlık / Kampanya Açıklaması
                 </label>
                 <input
@@ -262,13 +262,13 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
                   name="subtitle"
                   defaultValue={editingCampaign?.subtitle || ""}
                   placeholder="Örn: 190 TL yerine sadece 150 TL"
-                  className="w-full rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-2.5 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-amber-500"
+                  className="w-full rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-amber-500"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Rozet Metni
                   </label>
                   <input
@@ -276,12 +276,12 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
                     name="badgeText"
                     defaultValue={editingCampaign?.badgeText || "GÜNÜN FIRSATI"}
                     placeholder="GÜNÜN FIRSATI"
-                    className="w-full rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-2.5 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-amber-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Normal Fiyat (₺)
                   </label>
                   <input
@@ -290,12 +290,12 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
                     name="originalPrice"
                     defaultValue={editingCampaign?.originalPrice || ""}
                     placeholder="190"
-                    className="w-full rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-2.5 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 tabular-nums text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-amber-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Fırsat Fiyatı (₺)
                   </label>
                   <input
@@ -304,14 +304,14 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
                     name="discountedPrice"
                     defaultValue={editingCampaign?.discountedPrice || ""}
                     placeholder="150"
-                    className="w-full rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-2.5 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-amber-500"
+                    className="w-full rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 tabular-nums text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-amber-500"
                   />
                 </div>
               </div>
 
               {/* Görsel */}
               <div>
-                <label className="block font-semibold text-stone-700 dark:text-stone-300 mb-1">
+                <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Görsel (URL veya Cihazdan Seçin)
                 </label>
                 <div className="flex gap-2">
@@ -320,9 +320,9 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
                     value={imageUrlInput}
                     onChange={(e) => setImageUrlInput(e.target.value)}
                     placeholder="https://..."
-                    className="flex-1 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-2 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-amber-500"
+                    className="flex-1 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 text-slate-900 dark:text-slate-100 focus:ring-1 focus:ring-amber-500"
                   />
-                  <label className="cursor-pointer flex items-center gap-1 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-3 py-2 text-stone-600 dark:text-stone-300 hover:bg-stone-200">
+                  <label className="cursor-pointer flex items-center gap-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
                     <Upload className="h-4 w-4" />
                     <span>{isUploading ? "..." : "Yükle"}</span>
                     <input
@@ -344,23 +344,23 @@ export default function CampaignManagement({ campaigns }: CampaignManagementProp
                   defaultChecked={editingCampaign ? editingCampaign.isActive : true}
                   className="h-4 w-4 rounded text-amber-600 focus:ring-amber-500"
                 />
-                <label htmlFor="campActive" className="font-semibold text-stone-700 dark:text-stone-300">
+                <label htmlFor="campActive" className="font-medium text-slate-700 dark:text-slate-300">
                   Kampanya Menüde Yayında Olsun (Aktif)
                 </label>
               </div>
 
-              <div className="mt-6 flex justify-end gap-2 border-t border-stone-200 dark:border-stone-800 pt-4">
+              <div className="mt-5 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800 pt-3">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="rounded-xl px-4 py-2 font-semibold text-stone-500 hover:bg-stone-100"
+                  className="rounded-md px-3.5 py-2 font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="rounded-xl bg-amber-600 px-5 py-2 font-bold text-white shadow hover:bg-amber-700 disabled:opacity-50"
+                  className="rounded-md bg-amber-600 px-4 py-2 font-semibold text-white hover:bg-amber-500 disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
                 </button>

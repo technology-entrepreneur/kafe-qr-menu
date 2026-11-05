@@ -283,11 +283,96 @@ export const initialCategories: CategoryItem[] = [
       },
     ],
   },
+  {
+    id: "cat-hookah",
+    name: "Özel Nargileler & Mix",
+    nameEn: "Special Hookah & Mix Flavors",
+    icon: "💨",
+    order: 5,
+    isActive: true,
+    products: [
+      {
+        id: "prod-special-hookah",
+        name: "Gloriouss Special Mix Nargile",
+        nameEn: "Gloriouss Special Mix Hookah",
+        description: "Enfes premium tütünlerden çift aroma karışımı, özel difüzörlü takım ve meşe kömürü ile.",
+        descriptionEn: "Premium dual-flavor mix with special diffuser pipe and coconut charcoal.",
+        price: 320,
+        imageUrl: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=600&q=80",
+        isAvailable: true,
+        allergens: null,
+        prepTimeMinutes: 8,
+        badge: "popular",
+        order: 1,
+        categoryId: "cat-hookah",
+        extraGroups: [
+          {
+            id: "grp-flavor-1",
+            productId: "prod-special-hookah",
+            title: "1. Ana Aroma (Zorunlu)",
+            isRequired: true,
+            minSelect: 1,
+            maxSelect: 1,
+            order: 1,
+            options: [
+              { id: "flv-1", groupId: "grp-flavor-1", name: "Love 66 (Kavun, Karpuz, Nane)", price: 0, order: 1 },
+              { id: "flv-2", groupId: "grp-flavor-1", name: "Lady Killer (Kavun, Mango, Orman Meyvesi)", price: 0, order: 2 },
+              { id: "flv-3", groupId: "grp-flavor-1", name: "Geleneksel Çift Elma (Anasonlu)", price: 0, order: 3 },
+              { id: "flv-4", groupId: "grp-flavor-1", name: "Buzlu Yaban Mersini (Blueberry Chill)", price: 0, order: 4 },
+              { id: "flv-5", groupId: "grp-flavor-1", name: "Damla Sakızı & Nane", price: 0, order: 5 },
+            ],
+          },
+          {
+            id: "grp-flavor-2",
+            productId: "prod-special-hookah",
+            title: "2. Karışım Aroması (İsteğe Bağlı Mix)",
+            isRequired: false,
+            minSelect: 0,
+            maxSelect: 1,
+            order: 2,
+            options: [
+              { id: "mix-1", groupId: "grp-flavor-2", name: "+ Ekstra Buz (Ice Shot)", price: 20, order: 1 },
+              { id: "mix-2", groupId: "grp-flavor-2", name: "+ Taze Nane Dokunuşu", price: 20, order: 2 },
+              { id: "mix-3", groupId: "grp-flavor-2", name: "+ Vanilya Yumuşatıcı", price: 20, order: 3 },
+            ],
+          },
+          {
+            id: "grp-head-type",
+            productId: "prod-special-hookah",
+            title: "Lüle & Marpuç Tercihi",
+            isRequired: false,
+            minSelect: 0,
+            maxSelect: 2,
+            order: 3,
+            options: [
+              { id: "head-1", groupId: "grp-head-type", name: "Standart Kil Lüle", price: 0, order: 1 },
+              { id: "head-2", groupId: "grp-head-type", name: "Phunnel Glaze Lüle (Daha Yoğun Duman)", price: 30, order: 2 },
+              { id: "head-3", groupId: "grp-head-type", name: "Buzlu Marpuç (Ice Bazooka)", price: 35, order: 3 },
+            ],
+          },
+        ],
+      },
+      {
+        id: "prod-classic-hookah",
+        name: "Klasik Tek Aroma Nargile",
+        nameEn: "Classic Single Flavor Hookah",
+        description: "Seçkin klasik tatlar: Çift Elma, Üzüm Nane, Cappuccino, Limon Nane.",
+        descriptionEn: "Classic single aroma flavors.",
+        price: 290,
+        imageUrl: "https://images.unsplash.com/photo-1542385151-efd9000785a0?auto=format&fit=crop&w=600&q=80",
+        isAvailable: true,
+        allergens: null,
+        prepTimeMinutes: 7,
+        order: 2,
+        categoryId: "cat-hookah",
+      },
+    ],
+  },
 ];
 
 export const initialSettings: BusinessSettingsData = {
   id: "default",
-  cafeName: "Gloriouss Café",
+  cafeName: "Gloriouss Café & Lounge",
   logoUrl: "/images/logo.png",
   wifiSsid: "Gloriouss_Guest",
   wifiPassword: "Gloriouss2026",
@@ -298,6 +383,18 @@ export const initialSettings: BusinessSettingsData = {
   tiktokUrl: "https://www.tiktok.com/@gloriousscafe",
   googleReviewUrl: "https://maps.google.com/?q=Gloriouss+Cafe+Silivri",
   whatsappNumber: "905551234567",
+
+  // Modüler B2B Ayarları
+  businessType: "hookah_lounge",
+  isCatalogOnly: false,
+  hookahMode: true,
+  enableWaiterCall: true,
+  enableBillRequest: true,
+  enableQuickWifiBar: true,
+  enableGoogleReviewPrompt: true,
+  hookahCoalTimerMinutes: 25,
+  hookahCoalCooldownMinutes: 10,
+  kdsSlaDurationMinutes: 10,
 };
 
 // ==========================================
@@ -497,11 +594,73 @@ export async function updateBusinessSettings(data: Partial<BusinessSettingsData>
         tiktokUrl: data.tiktokUrl,
         googleReviewUrl: data.googleReviewUrl,
         whatsappNumber: data.whatsappNumber,
+        businessType: data.businessType || "cafe",
+        isCatalogOnly: data.isCatalogOnly ?? false,
+        hookahMode: data.hookahMode ?? false,
+        enableWaiterCall: data.enableWaiterCall ?? true,
+        enableBillRequest: data.enableBillRequest ?? true,
+        enableQuickWifiBar: data.enableQuickWifiBar ?? true,
+        enableGoogleReviewPrompt: data.enableGoogleReviewPrompt ?? true,
+        hookahCoalTimerMinutes: data.hookahCoalTimerMinutes ?? 25,
+        hookahCoalCooldownMinutes: data.hookahCoalCooldownMinutes ?? 10,
+        kdsSlaDurationMinutes: data.kdsSlaDurationMinutes ?? 10,
       },
       update: data,
     });
   } catch (err) {
-    return data;
+    Object.assign(initialSettings, data);
+    return initialSettings;
+  }
+}
+
+// ==========================================
+// 3.1. TOPLU FİYAT GÜNCELLEME (Esnaf Zam/İndirim Aracı)
+// ==========================================
+export async function bulkUpdatePrices(
+  percentage: number, // örn: 15 (%15 zam) veya -10 (%10 indirim)
+  categoryId?: string,
+  roundToNearest: number = 5 // örn: 5 TL'nin katına yuvarla
+) {
+  try {
+    const whereClause = categoryId && categoryId !== "all" ? { categoryId } : {};
+    const products = await prisma.product.findMany({ where: whereClause });
+
+    for (const prod of products) {
+      const multiplier = 1 + percentage / 100;
+      let newPrice = prod.price * multiplier;
+
+      if (roundToNearest > 0) {
+        newPrice = Math.round(newPrice / roundToNearest) * roundToNearest;
+      } else {
+        newPrice = Math.round(newPrice * 100) / 100;
+      }
+
+      await prisma.product.update({
+        where: { id: prod.id },
+        data: { price: Math.max(1, newPrice) },
+      });
+    }
+
+    return { success: true, count: products.length };
+  } catch (err) {
+    // In-memory fallback
+    let updatedCount = 0;
+    for (const cat of initialCategories) {
+      if (!categoryId || categoryId === "all" || cat.id === categoryId) {
+        for (const prod of cat.products || []) {
+          const multiplier = 1 + percentage / 100;
+          let newPrice = prod.price * multiplier;
+          if (roundToNearest > 0) {
+            newPrice = Math.round(newPrice / roundToNearest) * roundToNearest;
+          } else {
+            newPrice = Math.round(newPrice * 100) / 100;
+          }
+          prod.price = Math.max(1, newPrice);
+          updatedCount++;
+        }
+      }
+    }
+    return { success: true, count: updatedCount };
   }
 }
 
@@ -801,7 +960,7 @@ export async function getAdminByEmail(email: string) {
       id: "admin-default",
       email: "admin@kafe.com",
       name: "Kafe Yöneticisi",
-      passwordHash: "$2a$10$vYqF2jP6q1bM9uD5lG.eUe971L5h/5U0yWk5wH3aWzI.xLpM2T8m6", // admin123
+      passwordHash: "$2a$10$Z4QGkc638xpkK4qknRlfveWhsU8Awhx1DxpppBslYtK4QlUOLGgda", // admin123
     };
   }
   return null;

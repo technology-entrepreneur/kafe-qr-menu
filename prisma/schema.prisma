@@ -1,4 +1,5 @@
 // CRO & Satış Odaklı Modern QR Menü ve Kafe Yönetim Sistemi Prisma Şeması
+// v2.0 — TableSession, Order, KDS, ServiceCall modülleri eklendi
 
 generator client {
   provider = "prisma-client-js"
@@ -17,6 +18,8 @@ model Category {
   icon      String?
   order     Int       @default(0)
   isActive  Boolean   @default(true)
+  // KDS istasyon ayrımı: "kitchen" | "bar" | "both"
+  kdsStation String   @default("both")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -40,6 +43,8 @@ model Product {
   calories        Int?
   prepTimeMinutes Int?
   badge           String?  // chef, popular, deal, new
+  // KDS istasyon ayrımı: "kitchen" | "bar"
+  kdsStation      String   @default("kitchen")
   order           Int      @default(0)
   categoryId      String
   campaignId      String?
@@ -55,6 +60,8 @@ model Product {
   // Çapraz Satış (Cross-Selling) İlişkileri
   suggestions     ProductSuggestion[] @relation("SourceProduct")
   suggestedIn     ProductSuggestion[] @relation("TargetProduct")
+
+  orderItems      OrderItem[]
 
   @@index([categoryId])
   @@index([campaignId])
@@ -119,20 +126,139 @@ model Campaign {
   @@index([order])
 }
 
+// ============================================================
+// MASA OTURUMU (TABLE SESSION) — v2.0
+// ============================================================
+model TableSession {
+  id            String    @id @default(cuid())
+  tableNumber   String    // Masa numarası: "5", "A3", "Teras-2"
+  sessionToken  String    @unique @default(cuid()) // Dinamik QR token (güvenlik)
+  status        String    @default("OPEN") // OPEN | CLOSED | PAID
+  openedAt      DateTime  @default(now())
+  closedAt      DateTime?
+  totalAmount   Float     @default(0)
+  guestCount    Int       @default(1)
+  notes         String?
+
+  orders        Order[]
+  serviceCalls  ServiceCall[]
+
+  @@index([tableNumber])
+  @@index([sessionToken])
+  @@index([status])
+}
+
+// ============================================================
+// SİPARİŞ (ORDER) — v2.0
+// ============================================================
+model Order {
+  id            String    @id @default(cuid())
+  sessionId     String
+  tableNumber   String
+  // Siparişi kim verdi: "customer" (QR ile) | "waiter" (garson terminali)
+  source        String    @default("customer")
+  status        String    @default("PENDING")
+  // PENDING → PREPARING → READY → SERVED → CANCELLED
+  kdsStation    String    @default("kitchen") // "kitchen" | "bar" | "both"
+  totalAmount   Float
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  // KDS zaman damgaları
+  acceptedAt    DateTime? // Mutfak/Bar kabul etti
+  readyAt       DateTime? // Hazır
+  servedAt      DateTime? // Servis edildi
+
+  session       TableSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  items         OrderItem[]
+
+  @@index([sessionId])
+  @@index([tableNumber])
+  @@index([status])
+  @@index([kdsStation])
+  @@index([createdAt])
+}
+
+// ============================================================
+// SİPARİŞ KALEMİ (ORDER ITEM) — v2.0
+// ============================================================
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  productId       String?
+  productName     String   // Snapshot (ürün silinse bile kayıt kalır)
+  productPrice    Float    // Snapshot
+  quantity        Int
+  selectedOptions Json?    // SelectedExtraOption[] JSON
+  unitPrice       Float    // Seçenekler dahil birim fiyat
+  totalPrice      Float    // unitPrice × quantity
+  kdsStation      String   @default("kitchen")
+  status          String   @default("PENDING")
+  isPaid          Boolean  @default(false) // Kısmi ödeme (Esnaf dostu)
+
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([status])
+  @@index([isPaid])
+}
+
+// ============================================================
+// HİZMET ÇAĞRISI (SERVICE CALL) — v2.0
+// Garson Çağır / Hesap İste
+// ============================================================
+model ServiceCall {
+  id            String    @id @default(cuid())
+  sessionId     String
+  tableNumber   String
+  type          String    // "waiter" | "bill_cash" | "bill_card" | "bill_split"
+  status        String    @default("PENDING")
+  // PENDING | ACKNOWLEDGED | DONE
+  notes         String?
+  // Hesap istendiğinde ödeme yöntemi notu
+  paymentNote   String?
+  createdAt     DateTime  @default(now())
+  acknowledgedAt DateTime?
+  resolvedAt    DateTime?
+
+  session       TableSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([tableNumber])
+  @@index([status])
+  @@index([createdAt])
+}
+
 model BusinessSettings {
-  id              String   @id @default("default")
-  cafeName        String   @default("Gloriouss Café")
-  logoUrl         String?  @default("/images/logo.png")
-  wifiSsid        String?  @default("Gloriouss_Guest")
-  wifiPassword    String?  @default("Gloriouss2026")
-  workingHours    String?  @default("Her gün: 09:00 - 02:00")
-  phone           String?  @default("+90 212 727 00 00")
-  address         String?  @default("Piri Mehmet Paşa Mah. Sahil Kordonu, Silivri, İstanbul")
-  instagramUrl    String?  @default("https://www.instagram.com/gloriousscafe/")
-  tiktokUrl       String?  @default("https://www.tiktok.com/@gloriousscafe")
-  googleReviewUrl String?  @default("https://maps.google.com/?q=Gloriouss+Cafe+Silivri")
-  whatsappNumber  String?  @default("905551234567")
-  updatedAt       DateTime @updatedAt
+  id                        String   @id @default("default")
+  cafeName                  String   @default("Gloriouss Café")
+  logoUrl                   String?  @default("/images/logo.png")
+  wifiSsid                  String?  @default("Gloriouss_Guest")
+  wifiPassword              String?  @default("Gloriouss2026")
+  workingHours              String?  @default("Her gün: 09:00 - 02:00")
+  phone                     String?  @default("+90 212 727 00 00")
+  address                   String?  @default("Piri Mehmet Paşa Mah. Sahil Kordonu, Silivri, İstanbul")
+  instagramUrl              String?  @default("https://www.instagram.com/gloriousscafe/")
+  tiktokUrl                 String?  @default("https://www.tiktok.com/@gloriousscafe")
+  googleReviewUrl           String?  @default("https://maps.google.com/?q=Gloriouss+Cafe+Silivri")
+  whatsappNumber            String?  @default("905551234567")
+
+  // Modüler B2B İşletme Ayarları
+  businessType              String   @default("cafe") // cafe | hookah_lounge | restaurant | bar
+  isCatalogOnly             Boolean  @default(false)  // Sadece Görsel Katalog Modu (Sepet/Sipariş kapalı)
+  hookahMode                Boolean  @default(false)  // Nargile Kafe Modu (Köz Çağrısı + KDS Köz İstasyonu)
+  enableWaiterCall          Boolean  @default(true)   // Garson Çağırma Modülü
+  enableBillRequest         Boolean  @default(true)   // Hesap İsteme Modülü
+  enableQuickWifiBar        Boolean  @default(true)   // Tek Tıkla Kopyalanan Wi-Fi Barı
+  enableGoogleReviewPrompt  Boolean  @default(true)   // Hesap İsterken Google Yorum Kartı
+  hookahCoalTimerMinutes    Int      @default(25)     // Otomatik Köz Zamanlayıcı (dk)
+  hookahCoalCooldownMinutes Int      @default(10)     // Köz Çağrısı Cooldown (dk)
+
+  // KDS ayarları
+  kdsSlaDurationMinutes     Int      @default(10)     // SLA uyarısı için dakika eşiği
+  updatedAt                 DateTime @updatedAt
 }
 
 model AdminUser {

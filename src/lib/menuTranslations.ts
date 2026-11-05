@@ -618,47 +618,14 @@ export function getDefaultExtraGroups(
   return [];
 }
 
-// ====================================================
-// 4. KATEGORİ LOKALİZASYON YARDIMCISI
-// ====================================================
-export function localizeCategory(category: CategoryItem, lang: Language): CategoryItem {
-  const isEn = lang === "en";
-  const mappedEn = categoryMap[category.name] || category.nameEn || category.name;
-
-  return {
-    ...category,
-    nameEn: mappedEn,
-    products: (category.products || []).map((p) => localizeProduct(p, lang)),
-  };
-}
-
-// ====================================================
-// 5. ÜRÜN LOKALİZASYON & İÇERİK YARDIMCISI
-// ====================================================
-export function localizeProduct(product: ProductItem, lang: Language): ProductItem {
-  const isEn = lang === "en";
-  const transData = productDataMap[product.name];
-
-  const nameEn = product.nameEn || transData?.nameEn || product.name;
-  const descriptionEn =
-    product.descriptionEn || transData?.descriptionEn || product.description;
-  const allergensEn = transData?.allergensEn || product.allergens;
-  const ingredients = product.ingredients || transData?.ingredients || [];
-  const ingredientsEn = product.ingredientsEn || transData?.ingredientsEn || [];
-
-  // Varsa mevcut extraGroups, yoksa default varyantlar
-  const extraGroups =
-    product.extraGroups && product.extraGroups.length > 0
-      ? product.extraGroups
-      : getDefaultExtraGroups(product.name, product.categoryId, lang);
-
-  return {
-    ...product,
-    nameEn,
-    descriptionEn,
-    ingredients,
-    ingredientsEn,
-    allergens: isEn && allergensEn ? allergensEn : product.allergens,
-    extraGroups,
-  };
-}
+export {
+  SUPPORTED_LANGUAGES,
+  CATEGORY_TRANSLATIONS,
+  PRODUCT_TRANSLATIONS,
+  UI_TRANSLATIONS,
+  t,
+  getBadgeLabel,
+  localizeCategory,
+  localizeProduct,
+  getLocalizedExtraGroups,
+} from "./translations";

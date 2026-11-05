@@ -265,11 +265,11 @@ export default function QrCodeGenerator({ cafeName }: QrCodeGeneratorProps) {
         {/* Sağ Kolon: Canlı Masa Standı Önizlemesi */}
         <div
           ref={printRef}
-          className="rounded-3xl bg-white dark:bg-stone-900 p-8 border-2 border-stone-200 dark:border-stone-800 shadow-xl flex flex-col items-center justify-center text-center space-y-4"
+          className="rounded-lg bg-white dark:bg-slate-900 p-6 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center space-y-3"
         >
           <div className="space-y-1">
-            <span className="text-[11px] uppercase tracking-widest font-black text-amber-600">
-              {destinationType === "hub" ? "✨ Hoş Geldiniz" : "Temassız Menü"}
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-500">
+              {destinationType === "hub" ? "Hoş Geldiniz" : "Temassız Menü"}
             </span>
             <h3 className="text-xl font-black font-display text-stone-900 dark:text-stone-100">
               {cafeName}

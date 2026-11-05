@@ -39,61 +39,61 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#faf8f5] dark:bg-[#12100e] p-4 text-stone-900 dark:text-stone-100 font-sans">
-      <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white dark:bg-stone-900 shadow-2xl border border-stone-200/80 dark:border-stone-800 p-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 text-slate-900 dark:text-slate-100 font-sans">
+      <div className="w-full max-w-sm overflow-hidden rounded-lg bg-white dark:bg-slate-900 shadow-md border border-slate-200 dark:border-slate-800 p-6">
         {/* Kafe Logosu & İkon */}
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 shadow-inner">
-            <Coffee className="h-8 w-8" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+            <Coffee className="h-6 w-6" />
           </div>
-          <h1 className="mt-4 text-2xl font-black font-display tracking-tight text-stone-900 dark:text-stone-100">
+          <h1 className="mt-3 text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
             Yönetim Paneli Girişi
           </h1>
-          <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
-            QR Menü ve Kafe Ayarlarını yönetmek için giriş yapın
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            QR menü ve işletme ayarlarını yönetmek için giriş yapın
           </p>
         </div>
 
         {/* Hata Bildirimi */}
         {error && (
-          <div className="mt-6 flex items-center gap-2 rounded-2xl bg-rose-50 dark:bg-rose-950/40 p-3.5 text-xs text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/40">
+          <div className="mt-4 flex items-center gap-2 rounded-md bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/40">
             <AlertCircle className="h-4 w-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-3.5">
           <div>
-            <label className="block text-xs font-semibold text-stone-600 dark:text-stone-300 mb-1.5">
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
               Yönetici E-Posta
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@kafe.com"
-                className="w-full rounded-2xl bg-stone-50 dark:bg-stone-800/80 py-2.5 pl-10 pr-4 text-sm text-stone-900 dark:text-stone-100 border border-stone-200 dark:border-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                className="w-full rounded-md bg-slate-50 dark:bg-slate-800 py-2 pl-9 pr-3 text-xs text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-stone-600 dark:text-stone-300 mb-1.5">
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
               Şifre
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full rounded-2xl bg-stone-50 dark:bg-stone-800/80 py-2.5 pl-10 pr-4 text-sm text-stone-900 dark:text-stone-100 border border-stone-200 dark:border-stone-700 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                className="w-full rounded-md bg-slate-50 dark:bg-slate-800 py-2 pl-9 pr-3 text-xs text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
           </div>
@@ -101,7 +101,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 flex items-center justify-center gap-2 rounded-2xl bg-amber-600 hover:bg-amber-700 active:scale-98 py-3 text-sm font-bold text-white shadow-lg shadow-amber-600/20 transition-all disabled:opacity-50"
+            className="w-full mt-2 flex items-center justify-center gap-2 rounded-md bg-amber-600 hover:bg-amber-500 py-2.5 text-xs font-semibold text-white transition-colors disabled:opacity-50 cursor-pointer"
           >
             {isLoading ? (
               <span>Giriş Yapılıyor...</span>
@@ -115,8 +115,8 @@ export default function AdminLoginPage() {
         </form>
 
         {/* Test / Geliştirici Kolaylığı */}
-        <div className="mt-6 border-t border-stone-100 dark:border-stone-800 pt-4">
-          <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
+        <div className="mt-5 border-t border-slate-100 dark:border-slate-800 pt-3">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1">
               <Shield className="h-3.5 w-3.5 text-amber-600" />
               Demo Giriş:
@@ -124,7 +124,7 @@ export default function AdminLoginPage() {
             <button
               type="button"
               onClick={handleQuickFill}
-              className="font-medium text-amber-700 dark:text-amber-400 hover:underline"
+              className="font-medium text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
             >
               admin@kafe.com / admin123 (Doldur)
             </button>

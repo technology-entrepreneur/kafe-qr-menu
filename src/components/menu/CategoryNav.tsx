@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { motion } from "framer-motion";
 import { CategoryItem, Language } from "@/types/menu";
 
 interface CategoryNavProps {
@@ -21,7 +20,6 @@ export default function CategoryNav({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLButtonElement>(null);
 
-  // Aktif sekme değiştiğinde, onu yatay barda ortalayacak şekilde kaydır
   useEffect(() => {
     if (activeTabRef.current && scrollContainerRef.current) {
       const container = scrollContainerRef.current;
@@ -43,14 +41,14 @@ export default function CategoryNav({
   if (!categories || categories.length === 0) return null;
 
   return (
-    <nav className="w-full pb-2.5 pt-1 overflow-hidden">
+    <nav className="w-full py-2 bg-slate-950 border-b border-slate-800">
       <div
         ref={scrollContainerRef}
-        className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 max-w-2xl mx-auto scroll-smooth touch-pan-x select-none"
+        className="flex items-center gap-1.5 overflow-x-auto no-scrollbar px-4 max-w-2xl mx-auto scroll-smooth select-none"
       >
         {categories.map((category) => {
           const isActive = category.id === activeCategoryId;
-          const displayName = isEn && category.nameEn ? category.nameEn : category.name;
+          const displayName = language === "tr" ? category.name : (category.nameEn || category.name);
           const count = category.products?.length || 0;
 
           return (
@@ -58,37 +56,18 @@ export default function CategoryNav({
               key={category.id}
               ref={isActive ? activeTabRef : null}
               onClick={() => onSelectCategory(category.id)}
-              className={`relative flex items-center gap-1.5 min-h-[40px] px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-300 flex-shrink-0 cursor-pointer select-none ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0 cursor-pointer ${
                 isActive
-                  ? "text-stone-950 shadow-lg shadow-amber-500/25"
-                  : "bg-stone-900/90 text-stone-300 hover:text-white hover:bg-stone-800 border border-stone-800/90"
+                  ? "bg-slate-800 text-white border border-slate-700"
+                  : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
               }`}
             >
-              {/* Aktif Pill Animasyonlu Zemin (Spring Physics) */}
-              {isActive && (
-                <motion.div
-                  layoutId="activeCategoryPill"
-                  transition={{ type: "spring", stiffness: 450, damping: 32 }}
-                  className="absolute inset-0 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full z-0"
-                />
-              )}
-
-              {/* İkon */}
-              {category.icon && (
-                <span className="relative z-10 text-sm leading-none">
-                  {category.icon}
-                </span>
-              )}
-
-              {/* Kategori Adı */}
-              <span className="relative z-10">{displayName}</span>
-
-              {/* Ürün Sayısı Rozeti */}
+              <span>{displayName}</span>
               <span
-                className={`relative z-10 text-[10px] px-1.5 py-0.5 rounded-full font-bold transition-colors ${
+                className={`text-[10px] px-1 rounded tabular-nums ${
                   isActive
-                    ? "bg-stone-950/25 text-stone-950"
-                    : "bg-stone-800 text-stone-400"
+                    ? "bg-slate-700 text-slate-200"
+                    : "bg-slate-800 text-slate-500"
                 }`}
               >
                 {count}

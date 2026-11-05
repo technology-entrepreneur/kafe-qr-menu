@@ -1,196 +1,154 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { Plus, Sparkles, Flame, Heart, AlertCircle, Ban } from "lucide-react";
+import { Plus, Ban, Utensils } from "lucide-react";
 import { ProductItem, Language } from "@/types/menu";
 import { formatMoney } from "@/lib/cartMath";
+import { t, getBadgeLabel } from "@/lib/translations";
 
 interface ProductCardProps {
   product: ProductItem;
   onSelect: (product: ProductItem) => void;
   language: Language;
+  isCatalogOnly?: boolean;
 }
 
 export default function ProductCard({
   product,
   onSelect,
   language,
+  isCatalogOnly = false,
 }: ProductCardProps) {
   const isEn = language === "en";
   const isAvailable = product.isAvailable;
+  const [imgError, setImgError] = useState(false);
 
-  const displayName = isEn && product.nameEn ? product.nameEn : product.name;
+  const displayName = language === "tr" ? product.name : (product.nameEn || product.name);
   const displayDesc =
-    isEn && product.descriptionEn ? product.descriptionEn : product.description;
+    language === "tr" ? product.description : (product.descriptionEn || product.description);
 
-  // Rozet Metni & Rengi
   const getBadgeInfo = () => {
     if (!product.badge) return null;
+    const label = getBadgeLabel(product.badge, language) || product.badge;
     switch (product.badge) {
       case "chef":
-        return {
-          label: isEn ? "Chef's Special" : "Şefin Seçimi",
-          className: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-          icon: Sparkles,
-        };
+        return { label, className: "bg-slate-800 text-amber-400 border-slate-700" };
       case "popular":
-        return {
-          label: isEn ? "Most Popular" : "Çok Sevilen",
-          className: "bg-rose-500/20 text-rose-300 border-rose-500/30",
-          icon: Heart,
-        };
+        return { label, className: "bg-slate-800 text-slate-200 border-slate-700" };
       case "deal":
-        return {
-          label: isEn ? "Daily Deal" : "Günün Fırsatı",
-          className: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-          icon: Flame,
-        };
+        return { label, className: "bg-slate-800 text-emerald-400 border-slate-700" };
       case "new":
-        return {
-          label: isEn ? "New Flavor" : "Yeni Lezzet",
-          className: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-          icon: Sparkles,
-        };
+        return { label, className: "bg-slate-800 text-sky-400 border-slate-700" };
       default:
-        return {
-          label: product.badge,
-          className: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-          icon: Sparkles,
-        };
+        return { label, className: "bg-slate-800 text-slate-300 border-slate-700" };
     }
   };
 
   const badgeInfo = getBadgeInfo();
-  const [imgError, setImgError] = React.useState(false);
 
   return (
-    <motion.article
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.985 }}
+    <article
       onClick={() => onSelect(product)}
-      className={`group relative w-full rounded-2xl bg-stone-900/60 hover:bg-stone-900/90 border border-stone-800/80 hover:border-amber-500/30 p-3.5 sm:p-4 backdrop-blur-xl transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg hover:shadow-amber-500/5 ${
+      className={`group relative w-full rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 p-3.5 transition-colors cursor-pointer ${
         !isAvailable ? "opacity-60 cursor-not-allowed" : ""
       }`}
     >
-      <div className="flex items-start justify-between gap-3 sm:gap-4">
-        {/* ==================================================== */}
-        {/* SOL: ÜRÜN BİLGİLERİ, TİPOGRAFİ & ALERJENLER           */}
-        {/* ==================================================== */}
+      <div className="flex items-start justify-between gap-3">
+        {/* Sol: Ürün Bilgileri */}
         <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch">
           <div>
-            {/* Varsa Mikro Rozet */}
             {badgeInfo && (
-              <div className="mb-1.5 flex items-center gap-1">
+              <div className="mb-1.5 flex items-center">
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border tracking-wide uppercase ${badgeInfo.className}`}
+                  className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold border tracking-wide uppercase ${badgeInfo.className}`}
                 >
-                  <badgeInfo.icon className="w-2.5 h-2.5" />
-                  <span>{badgeInfo.label}</span>
+                  {badgeInfo.label}
                 </span>
               </div>
             )}
 
-            {/* Ürün Adı */}
-            <h3 className="text-sm sm:text-base font-bold text-stone-100 group-hover:text-amber-300 transition-colors tracking-tight line-clamp-2 leading-snug">
+            <h3 className="text-sm font-semibold text-slate-100 group-hover:text-amber-400 transition-colors tracking-tight line-clamp-2 leading-snug">
               {displayName}
             </h3>
 
-            {/* Ürün Açıklaması (2 Satır Clamp) */}
             {displayDesc && (
-              <p className="mt-1 text-xs text-stone-400 line-clamp-2 leading-relaxed">
+              <p className="mt-1 text-xs text-slate-400 line-clamp-2 leading-relaxed">
                 {displayDesc}
               </p>
             )}
           </div>
 
-          {/* Alt Bilgi Satırı: Fiyat, Kalori ve Diyet İkonları */}
+          {/* Alt Satır: Fiyat & Etiketler */}
           <div className="mt-3 flex items-center flex-wrap gap-2 pt-1">
-            {/* Fiyat */}
-            <span className="text-base sm:text-lg font-extrabold text-amber-400 font-display tracking-tight">
+            <span className="text-sm font-bold text-amber-400 tabular-nums">
               {formatMoney(product.price)}
             </span>
 
-            {/* Kalori Bilgisi */}
             {product.calories && (
-              <span className="text-[10px] font-medium text-stone-400 bg-stone-800/80 px-1.5 py-0.5 rounded-md">
-                🔥 {product.calories} kcal
+              <span className="text-[10px] font-medium text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded tabular-nums">
+                {product.calories} kcal
               </span>
             )}
 
-            {/* Beslenme & Alerjen Etiketleri */}
             <div className="flex items-center gap-1 text-[10px]">
               {product.dietaryTags?.includes("vegan") && (
-                <span
-                  className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium"
-                  title="Vegan"
-                >
-                  🌱 Vegan
+                <span className="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-900 font-medium">
+                  Vegan
                 </span>
               )}
               {product.dietaryTags?.includes("gluten-free") && (
-                <span
-                  className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium"
-                  title={isEn ? "Gluten-Free" : "Glutensiz"}
-                >
-                  🌾 {isEn ? "Gluten-Free" : "Glutensiz"}
+                <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-medium">
+                  {isEn ? "Gluten-Free" : "Glutensiz"}
                 </span>
               )}
               {product.allergens && (
                 <span
-                  className="px-1.5 py-0.5 rounded-md bg-stone-800 text-stone-400 text-[10px] truncate max-w-[100px]"
+                  className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] truncate max-w-[120px]"
                   title={`${isEn ? "Allergen: " : "Alerjen: "}${isEn && product.allergensEn ? product.allergensEn : product.allergens}`}
                 >
-                  ⚠️ {isEn && product.allergensEn ? product.allergensEn : product.allergens}
+                  {isEn ? "Allergen: " : "Alerjen: "}{isEn && product.allergensEn ? product.allergensEn : product.allergens}
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* ==================================================== */}
-        {/* SAĞ: STÜDYO KALİTESİNDE GÖRSEL & EKLE BUTONU          */}
-        {/* ==================================================== */}
-        <div className="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 rounded-2xl overflow-hidden bg-stone-800 border border-stone-700/60 shadow-md">
+        {/* Sağ: Ürün Fotoğrafı */}
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-md overflow-hidden bg-slate-800 border border-slate-700/80">
           {product.imageUrl && !imgError ? (
             <Image
               src={product.imageUrl}
               alt={displayName}
               fill
-              sizes="(max-width: 640px) 96px, 112px"
+              sizes="(max-width: 640px) 80px, 96px"
               onError={() => setImgError(true)}
-              className={`object-cover transition-transform duration-500 group-hover:scale-105 ${
-                !isAvailable ? "grayscale contrast-125" : ""
-              }`}
+              className={`object-cover ${!isAvailable ? "grayscale" : ""}`}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-stone-800 text-stone-500">
-              <span className="text-2xl">☕</span>
+            <div className="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500">
+              <Utensils className="w-5 h-5 text-slate-600" />
             </div>
           )}
 
-          {/* Karartma Gradyanı */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-
-          {/* Tükendi Durumu Overlay */}
+          {/* Tükendi Durumu */}
           {!isAvailable && (
-            <div className="absolute inset-0 bg-stone-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-1">
-              <Ban className="w-5 h-5 text-rose-400 mb-0.5" />
+            <div className="absolute inset-0 bg-slate-950/85 flex flex-col items-center justify-center text-center p-1">
+              <Ban className="w-4 h-4 text-rose-400 mb-0.5" />
               <span className="text-[10px] font-bold text-rose-300 uppercase tracking-wider">
-                {isEn ? "Sold Out" : "Tükendi"}
+                {t("outOfStock", language)}
               </span>
             </div>
           )}
 
-          {/* Hızlı Eylem / İncele İkonu (Sağ Alt Köşe) */}
-          {isAvailable && (
-            <div className="absolute bottom-1.5 right-1.5 w-7 h-7 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-amber-400 transition-all duration-300">
+          {/* Ekle Artı Butonu */}
+          {isAvailable && !isCatalogOnly && (
+            <div className="absolute bottom-1.5 right-1.5 w-6 h-6 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center shadow transition-colors">
               <Plus className="w-4 h-4 stroke-[2.5]" />
             </div>
           )}
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 }

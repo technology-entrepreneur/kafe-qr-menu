@@ -1,18 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const outfit = Outfit({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-outfit",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Dijital QR Menü | Satış & Dönüşüm Odaklı Kafe Deneyimi",
@@ -45,8 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr" className={`dark ${inter.variable} ${outfit.variable}`}>
-      <body className="min-h-screen antialiased selection:bg-amber-500 selection:text-white">
+    <html lang="tr" className="dark">
+      <body className="min-h-screen antialiased selection:bg-amber-500 selection:text-white font-sans">
         {children}
       </body>
     </html>

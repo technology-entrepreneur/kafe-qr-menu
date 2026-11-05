@@ -35,7 +35,7 @@ export default function CategoryTabs({
   }, [activeCategoryId]);
 
   return (
-    <div className="sticky top-0 z-30 w-full bg-white/95 dark:bg-stone-900/95 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800 transition-colors shadow-sm">
+    <div className="sticky top-0 z-30 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors shadow-sm">
       <div
         ref={containerRef}
         className="no-scrollbar flex items-center gap-2 overflow-x-auto px-4 py-2.5 max-w-xl mx-auto"

@@ -117,6 +117,18 @@ export interface BusinessSettingsData {
   tiktokUrl: string | null;
   googleReviewUrl: string | null;
   whatsappNumber: string | null;
+
+  // Modüler B2B İşletme Ayarları
+  businessType?: "cafe" | "hookah_lounge" | "restaurant" | "bar" | string;
+  isCatalogOnly?: boolean;
+  hookahMode?: boolean;
+  enableWaiterCall?: boolean;
+  enableBillRequest?: boolean;
+  enableQuickWifiBar?: boolean;
+  enableGoogleReviewPrompt?: boolean;
+  hookahCoalTimerMinutes?: number;
+  hookahCoalCooldownMinutes?: number;
+  kdsSlaDurationMinutes?: number;
   updatedAt?: string | Date;
 }
 
@@ -135,6 +147,27 @@ export interface CartItem {
   totalPrice: number;
 }
 
-export type Language = "tr" | "en";
+export type Language = "tr" | "en" | "ar" | "ru" | "de";
 
-export type ServiceCallType = "waiter" | "bill_cash" | "bill_card" | "bill_meal";
+export interface LanguageConfig {
+  code: Language;
+  name: string;
+  nativeName: string;
+  flag: string;
+  dir: "ltr" | "rtl";
+}
+
+export const SUPPORTED_LANGUAGES: LanguageConfig[] = [
+  { code: "tr", name: "Türkçe", nativeName: "Türkçe", flag: "🇹🇷", dir: "ltr" },
+  { code: "en", name: "English", nativeName: "English", flag: "🇬🇧", dir: "ltr" },
+  { code: "ar", name: "Arapça", nativeName: "العربية", flag: "🇸🇦", dir: "rtl" },
+  { code: "ru", name: "Rusça", nativeName: "Русский", flag: "🇷🇺", dir: "ltr" },
+  { code: "de", name: "Almanca", nativeName: "Deutsch", flag: "🇩🇪", dir: "ltr" },
+];
+
+export type ServiceCallType =
+  | "waiter"
+  | "bill_cash"
+  | "bill_card"
+  | "bill_split"
+  | "hookah_coal";

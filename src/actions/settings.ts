@@ -18,6 +18,15 @@ export async function updateBusinessSettingsAction(formData: FormData): Promise<
     tiktokUrl: formData.get("tiktokUrl")?.toString() || null,
     googleReviewUrl: formData.get("googleReviewUrl")?.toString() || null,
     whatsappNumber: formData.get("whatsappNumber")?.toString() || null,
+    businessType: formData.get("businessType")?.toString() || "cafe",
+    isCatalogOnly: formData.get("isCatalogOnly") === "true" || formData.get("isCatalogOnly") === "on",
+    hookahMode: formData.get("hookahMode") === "true" || formData.get("hookahMode") === "on",
+    enableWaiterCall: formData.get("enableWaiterCall") === "true" || formData.get("enableWaiterCall") === "on",
+    enableBillRequest: formData.get("enableBillRequest") === "true" || formData.get("enableBillRequest") === "on",
+    enableQuickWifiBar: formData.get("enableQuickWifiBar") === "true" || formData.get("enableQuickWifiBar") === "on",
+    enableGoogleReviewPrompt: formData.get("enableGoogleReviewPrompt") === "true" || formData.get("enableGoogleReviewPrompt") === "on",
+    hookahCoalTimerMinutes: Number(formData.get("hookahCoalTimerMinutes") || 25),
+    hookahCoalCooldownMinutes: Number(formData.get("hookahCoalCooldownMinutes") || 10),
   };
 
   return runAdminAction(BusinessSettingsSchema, rawData, async (valid) => {
@@ -33,6 +42,15 @@ export async function updateBusinessSettingsAction(formData: FormData): Promise<
       tiktokUrl: valid.tiktokUrl,
       googleReviewUrl: valid.googleReviewUrl,
       whatsappNumber: valid.whatsappNumber,
+      businessType: valid.businessType || "cafe",
+      isCatalogOnly: valid.isCatalogOnly,
+      hookahMode: valid.hookahMode,
+      enableWaiterCall: valid.enableWaiterCall,
+      enableBillRequest: valid.enableBillRequest,
+      enableQuickWifiBar: valid.enableQuickWifiBar,
+      enableGoogleReviewPrompt: valid.enableGoogleReviewPrompt,
+      hookahCoalTimerMinutes: valid.hookahCoalTimerMinutes,
+      hookahCoalCooldownMinutes: valid.hookahCoalCooldownMinutes,
     });
 
     revalidatePath("/");

@@ -119,8 +119,8 @@ export default function ProductCrossSellModal({
   const otherProducts = allProducts.filter((p) => p.id !== product.id);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm font-sans">
-      <div className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-stone-900 shadow-2xl border border-stone-200 dark:border-stone-800 max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 font-sans">
+      <div className="relative w-full max-w-2xl rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col overflow-hidden">
         {/* Başlık Çubuğu */}
         <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
           <div>
